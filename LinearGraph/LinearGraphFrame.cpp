@@ -1739,7 +1739,7 @@ void CLinearGraphFrameWnd::OnHelpAbout()
 {
     LGTRACE_FUNCTION();
 
-    ::ShellExecuteW(m_hWnd, L"open", L"http://code.google.com/p/linear-graph/", 0, 0, SW_SHOW);
+    ::ShellExecuteW(m_hWnd, L"open", L"http://code.google.com/p/lineargraph/", 0, 0, SW_SHOW);
 }
 
 void CLinearGraphFrameWnd::OnHelpHelp()

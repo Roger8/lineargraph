@@ -1,0 +1,404 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DLG_LINEAR DIALOGEX 0, 0, 256, 102
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "线性变换"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,145,81,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,199,81,50,14
+    EDITTEXT        IDC_EDIT_PARAM2,46,38,168,13,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT_PARAM1,46,22,168,13,ES_AUTOHSCROLL
+    LTEXT           "K = ",IDC_STATIC,25,23,16,11
+    LTEXT           "C = ",IDC_STATIC,24,39,18,11
+END
+
+IDD_DLG_DATETIME DIALOGEX 0, 0, 219, 84
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "编辑数据时间信息"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Cancel",IDC_BTN_CANCEL,165,66,50,14
+    DEFPUSHBUTTON   "Ok",IDC_BTN_OK,113,66,50,14
+    CONTROL         "",IDC_DTPICKER_DATE,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_LONGDATEFORMAT | WS_TABSTOP,55,6,130,15
+    CONTROL         "",IDC_DTPICKER_TIME,"SysDateTimePick32",DTS_RIGHTALIGN | DTS_UPDOWN | WS_TABSTOP | 0x8,55,23,71,15
+    LTEXT           "日期",IDC_STATIC,9,9,24,11
+    LTEXT           "时间",IDC_STATIC,9,26,24,11
+    LTEXT           "样本频率",IDC_STATIC,9,43,36,11
+    EDITTEXT        IDC_EDIT_FREQ_MULTI,55,40,57,15,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT_FREQ_BASE,128,40,57,15,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "/",IDC_STATIC,119,43,8,11
+    EDITTEXT        IDC_EDIT_TIME_MS,128,23,57,15,ES_AUTOHSCROLL | ES_NUMBER
+END
+
+IDD_DLG_SELDATA DIALOGEX 0, 0, 316, 183
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "选择数据源"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_LIST_DATA,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,2,1,311,155
+    DEFPUSHBUTTON   "OK",IDC_BTN_OK,200,162,56,17
+    PUSHBUTTON      "Cancel",IDC_BTN_CANCEL,258,162,56,17
+END
+
+IDD_DLG_GRAPHNAME DIALOGEX 0, 0, 249, 73
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "编辑图表名及显示字体"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,137,54,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,190,54,50,14
+    EDITTEXT        IDC_EDIT_NAME,13,20,172,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_CB_FONTS,190,21,50,15,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_DLG_FORMATSAVE DIALOGEX 0, 0, 311, 79
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save File As"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,202,58,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,254,58,50,14
+    LTEXT           "保存路径",IDC_STATIC,23,13,36,8
+    EDITTEXT        IDC_EDIT_SAVEDIR,69,11,181,15,ES_AUTOHSCROLL
+    PUSHBUTTON      "选择文件夹",IDC_BTN_BROWSE,254,11,50,14
+    LTEXT           "数据格式",IDC_STATIC,23,32,39,10
+    COMBOBOX        IDC_CB_FMTLIST,69,29,181,72,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "覆盖文件时提醒我",IDC_CHK_REMINDONWRITE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,59,86,13
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DLG_LINEAR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 249
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
+    END
+
+    IDD_DLG_GRAPHNAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 1
+        RIGHTMARGIN, 247
+        TOPMARGIN, 1
+        BOTTOMMARGIN, 68
+    END
+
+    IDD_DLG_FORMATSAVE, DIALOG
+    BEGIN
+        RIGHTMARGIN, 304
+        BOTTOMMARGIN, 72
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU_MAIN MENU 
+BEGIN
+    POPUP "文件(&F)"
+    BEGIN
+        MENUITEM "打开数据文件...\tCtrl+O",           ID_FILE_OPENDATA
+        MENUITEM SEPARATOR
+        MENUITEM "关闭\tCtrl+W",                  ID_FILE_CLOSEDATA
+        MENUITEM "全部关闭\tCtrl+Shift+W",          ID_FILE_CLOSEALL
+        MENUITEM SEPARATOR
+        MENUITEM "保存数据...\tCtrl+S",             ID_FILE_SAVEDATA
+        MENUITEM "导出数据片段...\tCtrl+E",           ID_FILE_EXPORT_DATA
+        MENUITEM SEPARATOR
+        MENUITEM "保存图像...\tCtrl+P",             ID_FILE_SAVEIMAGE
+        MENUITEM "保存所有图像...\tCtrl+Shift+P",     ID_FILE_SAVEALL_IMAGE
+        MENUITEM SEPARATOR
+        MENUITEM "退出\tAlt+F4",                  ID_FILE_EXITAPP
+    END
+    POPUP "编辑(&E)"
+    BEGIN
+        MENUITEM "重命名...\tF2",                  ID_EDIT_RENAME
+        MENUITEM "编辑日期时间...\tF3",               ID_EDIT_DATETIME
+        MENUITEM SEPARATOR
+        MENUITEM "重新载入数据\tF5",                  ID_EDIT_RELOAD
+    END
+    POPUP "布局(&L)"
+    BEGIN
+        MENUITEM "单视图(1x1)\tShift+X",           ID_LAYOUT_TAB
+        MENUITEM SEPARATOR
+        MENUITEM "单列垂直排列(1xn)\tShift+S",        ID_LAYOUT_SINGLECOL
+        MENUITEM "双列垂直排列(2xn)\tShift+D",        ID_LAYOUT_DICOL
+        MENUITEM "三列垂直排列(3xn)\tShift+T",        ID_LAYOUT_TRECOL
+    END
+    POPUP "视图(&V)"
+    BEGIN
+        MENUITEM "设置前景色...\tCtrl+Shift+F",      ID_VIEW_FOREGNDCLR
+        MENUITEM "设置背景色...\tCtrl+Shift+B",      ID_VIEW_BKGNDCLR
+        MENUITEM SEPARATOR
+        MENUITEM "标尺\tCtrl+R",                  ID_VIEW_RULER
+        MENUITEM "水平线\tCtrl+H",                 ID_VIEW_HORZLINE
+        MENUITEM "坐标刻度",                        ID_VIEW_COORD
+        MENUITEM "图例",                          ID_VIEW_LEGEND
+        MENUITEM "位置标签\tCtrl+L",                ID_VIEW_POSLABEL
+        MENUITEM SEPARATOR
+        MENUITEM "清除比较曲线\tF11",                 ID_VIEW_CLEARCMP
+        MENUITEM "全景视图\tF12",                   ID_VIEW_RESTORE
+        MENUITEM SEPARATOR
+        MENUITEM "放大\tCtrl++",                  ID_VIEW_ZOOMIN
+        MENUITEM "缩小\tCtrl+-",                  ID_VIEW_ZOOMOUT
+    END
+    POPUP "分析(&A)"
+    BEGIN
+        MENUITEM "比较...\tCtrl+K",               ID_ANALYZE_COMPARE
+        MENUITEM "同步选区...\tCtrl+J",             ID_ANALYZE_SYNC
+        MENUITEM SEPARATOR
+        MENUITEM "线性变换...",                     ID_ANALYZE_LINEAR
+        MENUITEM "平方",                          ID_ANALYZE_POWER
+        MENUITEM "微分",                          ID_ANALYZE_DIFF
+    END
+    POPUP "选项(&O)"
+    BEGIN
+        MENUITEM "显示透明的选择区域",                   ID_OPT_TRANSLUCENTSEL
+        MENUITEM "启用选区放大功能",                    ID_OPT_SELECTTRANSFORM
+    END
+    POPUP "帮助(&H)"
+    BEGIN
+        MENUITEM "使用帮助\tF1",                    ID_HELP_HELP
+        MENUITEM "关于...",                       ID_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ACTION_STOPPED      "操作被阻止"
+    IDS_INVALID_ARGS        "无效参数"
+    IDS_NUMERIC_OVERFLOW    "数值过大或过小, 运算结果将溢出!"
+    IDS_SELECT_TARGET_FOLDER "选择目标文件夹"
+    IDS_SOURCE_NAME         "数据源名"
+    IDS_FREQUENCY           "频率"
+    IDS_TIMESTAMP           "时间戳"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DATAPTS             "数据点数"
+    IDS_SOURCE_PATH         "数据源路径"
+    IDS_FOLDER_PATH_EMPTY   "文件夹路径不能为空!"
+    IDS_FREQUENCY_EMPTY     "频率不可以为零或为空!"
+    IDS_COEFFICIENT_EMPTY   "系数不可以为空!"
+    IDS_APP_CAPTION         "LinearGraph"
+    IDS_SOURCE_SELECT_EMPTY "请选择要操作的数据源!"
+    IDS_ERR_OPEN_FAILED     "文档打开失败!"
+    IDS_ERR_LOG_FAILED      "日志组件初始化错误,日志记录将不可用!"
+    IDS_ERR_SAVE_FAILED     "数据保存失败!"
+    IDS_ACCESS_DENIED       "拒绝访问"
+    IDS_IMGFMT_BMP          "位图(.bmp)"
+    IDS_IMGFMT_PNG          "可移植网络图形(.png)"
+    IDS_IMGFMT_JPEG         "联合图像专家组(.jpg)"
+    IDS_IMGFMT_GIF          "图形交换格式(.gif)"
+    IDS_IMGFMT_TIFF         "标签图像文件格式(.tiff)"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SAVE_IMAGE          "保存图像"
+    IDS_SAVE_DATA           "保存数据"
+    IDS_DATAFMT_BIN         "二进制格式(.binx)"
+    IDS_DATAFMT_TEXT        "文本格式-纯数据(.txt)"
+    IDS_DATAFMT_TEXT_WITHTIME "文本格式-带时间戳的数据(.txt)"
+    IDS_APPLICATIOIN_BUSY   "该操作可能需要较长时间, 程序正在处理, 请稍候..."
+    IDS_OPEN_DOCUMENT       "正在打开文件: "
+    IDS_PREPARE_VIEW        "正在准备数据视图..."
+    IDS_TASKMONITOR_CAPTION "LinearGraph Task Monitor"
+    IDS_SAFE_EXIT           "安全终止程序"
+    IDS_EXIT_CONFIRM        "终止程序会导致未保存的数据丢失, 是否确定终止程序?"
+    IDS_EXPORT_DATA         "导出数据片段"
+    IDS_ERR_DOC_CHANGED     "文档已被更改, 无法找到原始数据!"
+    IDS_FILE_EXIST          "以下文件已经存在, 是否覆盖?"
+    IDS_ERR_OSVER_LOW       "您使用的操作系统版本过低或正在使用兼容模式运行!"
+    IDS_ERR_OUT_OF_MEMORY   "系统内存不足"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERR_GMEM_OVER       "系统图形内存耗尽, 请关闭一些不需要使用的窗口后再尝试当前操作"
+END
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_LOGO                ICON                    "logo.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,10,7,26
+ PRODUCTVERSION 1,10,7,26
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "Graduation Project of Xu Rui"
+            VALUE "CompanyName", "School of Physics, HUST, China"
+            VALUE "FileDescription", "LinearGraph Application"
+            VALUE "FileVersion", "1.10.7.26"
+            VALUE "InternalName", "LinearGraph"
+            VALUE "LegalCopyright", "An X.R. Program Work (c) 2010, All rights reserved."
+            VALUE "OriginalFilename", "LinearGraph.exe"
+            VALUE "ProductName", "LinearGraph Application"
+            VALUE "ProductVersion", "1.10.7.26"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR ACCELERATORS 
+BEGIN
+    "K",            ID_ANALYZE_COMPARE,     VIRTKEY, CONTROL, NOINVERT
+    "J",            ID_ANALYZE_SYNC,        VIRTKEY, CONTROL, NOINVERT
+    VK_F3,          ID_EDIT_DATETIME,       VIRTKEY, NOINVERT
+    VK_F5,          ID_EDIT_RELOAD,         VIRTKEY, NOINVERT
+    VK_F2,          ID_EDIT_RENAME,         VIRTKEY, NOINVERT
+    "W",            ID_FILE_CLOSEALL,       VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "W",            ID_FILE_CLOSEDATA,      VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_FILE_EXPORT_DATA,    VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPENDATA,       VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_SAVEALL_IMAGE,  VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVEDATA,       VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_SAVEIMAGE,      VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          ID_HELP_HELP,           VIRTKEY, NOINVERT
+    "D",            ID_LAYOUT_DICOL,        VIRTKEY, SHIFT, NOINVERT
+    "S",            ID_LAYOUT_SINGLECOL,    VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_LAYOUT_TAB,          VIRTKEY, SHIFT, NOINVERT
+    "T",            ID_LAYOUT_TRECOL,       VIRTKEY, SHIFT, NOINVERT
+    "B",            ID_VIEW_BKGNDCLR,       VIRTKEY, SHIFT, CONTROL, NOINVERT
+    VK_F11,         ID_VIEW_CLEARCMP,       VIRTKEY, NOINVERT
+    "F",            ID_VIEW_FOREGNDCLR,     VIRTKEY, SHIFT, CONTROL, NOINVERT
+    "H",            ID_VIEW_HORZLINE,       VIRTKEY, CONTROL, NOINVERT
+    "L",            ID_VIEW_POSLABEL,       VIRTKEY, CONTROL, NOINVERT
+    VK_F12,         ID_VIEW_RESTORE,        VIRTKEY, NOINVERT
+    "R",            ID_VIEW_RULER,          VIRTKEY, CONTROL, NOINVERT
+    VK_OEM_PLUS,    ID_VIEW_ZOOMIN,         VIRTKEY, CONTROL, NOINVERT
+    VK_OEM_MINUS,   ID_VIEW_ZOOMOUT,        VIRTKEY, CONTROL, NOINVERT
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

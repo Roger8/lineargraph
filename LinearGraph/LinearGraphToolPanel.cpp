@@ -56,6 +56,7 @@ void CLinearGraphToolPanel::OnNotify(UINT uID, NMHDR* pNmhdr)
         if( pNmhdr->code == TCN_SELCHANGE )
         {
             m_pFrame->Send(LinearGraphTabSelectChange, IDC_TABPANEL, (LPARAM)this);
+            InvalidateRect();
         }
         break;
     default:
@@ -73,6 +74,7 @@ int CLinearGraphToolPanel::AddTab(PCWSTR tabName)
     {
         m_tabPanel.ShowWindow(SW_SHOW);
     }
+    InvalidateRect();
     return iTab;
 }
 

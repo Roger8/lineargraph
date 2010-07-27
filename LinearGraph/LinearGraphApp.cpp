@@ -11,7 +11,7 @@ void linear_graph_new_handler()
         );
     if( nRet != IDOK )
     {
-        LGTRACE_CLOSE();
+        LG_CLOSE_LOG();
         ::ExitProcess(0);
     }
 }
@@ -52,12 +52,12 @@ BOOL CLinearGraphApp::OnInitApplication()
         return FALSE;
     }
 
-    if( !LGTRACE_OPEN() )
+    if( !LG_OPEN_LOG() )
     {
         GetString(IDS_ERR_LOG_FAILED, reasonString, 128);
         ::MessageBoxW(0, reasonString, appCaption, MB_ICONWARNING);
     }
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     std::set_new_handler(linear_graph_new_handler);
 
@@ -82,7 +82,7 @@ BOOL CLinearGraphApp::OnInitApplication()
 
     for(int i = 1; i < argc; i++)
     {
-        LGTRACE("Open document from command line: %ws", argv[i]);
+        LG_TRACE("Open document from command line: %ws", argv[i]);
         if( !pFrameWnd->OpenDocument(argv[i]) )
         {
             GetString(IDS_ERR_OPEN_FAILED, reasonString, 128);
@@ -99,7 +99,7 @@ BOOL CLinearGraphApp::OnInitApplication()
 
 BOOL CLinearGraphApp::OnExitApplication()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     CApplication::OnExitApplication();
 
@@ -113,7 +113,7 @@ BOOL CLinearGraphApp::OnExitApplication()
     ::WaitForSingleObject(m_hMonitor, INFINITE);
     ::CloseHandle(m_hMonitor);
 
-    LGTRACE_CLOSE();
+    LG_CLOSE_LOG();
     return TRUE;
 }
 
@@ -139,7 +139,7 @@ struct TASKMONITORPARAM
 
 BOOL CLinearGraphApp::InitAsyncTaskMonitor()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     TASKMONITORPARAM tmp;
     tmp.pApplication = this;

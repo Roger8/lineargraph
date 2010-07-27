@@ -898,14 +898,14 @@ void CLinearGraphFrameWnd::OnInitMenuPopup(HMENU hMenu, UINT nPos, BOOL bIsWindo
 
 void CLinearGraphFrameWnd::OnDropFiles(HDROP hDrop)
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     int     cFiles;
     int     cchSize;
     PWCHAR  fileName;
 
     cFiles = ::DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0);
-    LGTRACE("%d documents by drop", cFiles);
+    LG_TRACE("%d documents by drop", cFiles);
 
     for(int i = 0; i < cFiles; i++)
     {
@@ -931,7 +931,7 @@ void CLinearGraphFrameWnd::OnDropFiles(HDROP hDrop)
 
 BOOL CLinearGraphFrameWnd::OnOpenDocument(PCWSTR szFileName)
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     BeginHeavyTask();
     EnterHeavyOpenTask(szFileName);
@@ -939,8 +939,7 @@ BOOL CLinearGraphFrameWnd::OnOpenDocument(PCWSTR szFileName)
     CLinearGraphDoc doc;
     if( !doc.Open(szFileName) )
     {
-        LGTRACE("FAILURE %ws", szFileName);
-        LGFLUSH();
+        LG_ERROR("Failed to open document: %ws", szFileName);
         CLinearGraphApp::GetApp()->EndHeavyTask();
         return FALSE;
     }
@@ -978,13 +977,13 @@ BOOL CLinearGraphFrameWnd::OnOpenDocument(PCWSTR szFileName)
 
     UpdateWindowLayout();
     UpdateStatusPanel();
-    LGTRACE("SUCCESS %ws", szFileName);
+    LG_TRACE("Document opened successfully: %ws", szFileName);
     return TRUE;
 }
 
 void CLinearGraphFrameWnd::OnActivateView(CLinearGraphView* pView)
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( m_pLastActiveView == pView )
     {
@@ -1003,7 +1002,7 @@ void CLinearGraphFrameWnd::OnActivateView(CLinearGraphView* pView)
 
 void CLinearGraphFrameWnd::OnActiveViewChanged()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( m_pLastActiveView && (TabbedDoc == m_layoutStyle))
     {
@@ -1019,7 +1018,7 @@ void CLinearGraphFrameWnd::OnActiveViewChanged()
 
 void CLinearGraphFrameWnd::OnFileOpen()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     OPENFILENAMEW ofn = {0};
     ofn.lStructSize = sizeof(OPENFILENAMEW);
@@ -1062,7 +1061,7 @@ void CLinearGraphFrameWnd::OnFileOpen()
 
 void CLinearGraphFrameWnd::OnFileSaveImage()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     CLinearGraphViewPtr pView = GetActiveView();
     if( !pView )
@@ -1089,7 +1088,7 @@ void CLinearGraphFrameWnd::OnFileSaveImage()
 
 void CLinearGraphFrameWnd::OnFileSaveAllImages()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     CLinearGraphViewPtr pView = GetActiveView();
     if( !pView )
@@ -1113,7 +1112,7 @@ void CLinearGraphFrameWnd::OnFileSaveAllImages()
 
 void CLinearGraphFrameWnd::OnFileClose()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView )
     {
@@ -1145,7 +1144,7 @@ void CLinearGraphFrameWnd::OnFileClose()
 
 void CLinearGraphFrameWnd::OnFileCloseAll()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_toolPanel.RemoveAllViewTabs();
     m_pLastActiveView = 0;
@@ -1162,7 +1161,7 @@ void CLinearGraphFrameWnd::OnFileCloseAll()
 
 void CLinearGraphFrameWnd::OnFileExportData()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView || !m_pLastActiveView->GetDataObject() )
     {
@@ -1188,7 +1187,7 @@ void CLinearGraphFrameWnd::OnFileExportData()
 
 void CLinearGraphFrameWnd::OnFileSave()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView || !m_pLastActiveView->GetDataObject() )
     {
@@ -1212,7 +1211,7 @@ void CLinearGraphFrameWnd::OnFileSave()
 BOOL CLinearGraphFrameWnd::SaveDataToFile(const CDataObjectPtr pdo, CRectangle* pClip,
     BOOL bCheckOverwrite, DWORD dwFormat, CString& dirName)
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
     
     if( !pdo->hasTimestamp() && dwFormat == CSaveDataDlg::DataTXTWithTimestamp )
     {
@@ -1338,7 +1337,7 @@ BOOL CLinearGraphFrameWnd::SaveDataToFile(const CDataObjectPtr pdo, CRectangle* 
 
 void CLinearGraphFrameWnd::OnEditRename()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1353,7 +1352,7 @@ void CLinearGraphFrameWnd::OnEditRename()
 
 void CLinearGraphFrameWnd::OnEditDateTime()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1370,7 +1369,7 @@ void CLinearGraphFrameWnd::OnEditDateTime()
 
 void CLinearGraphFrameWnd::OnEditReload()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     CDataObjectPtr pdo = m_pLastActiveView->GetDataObject();
     if( !m_pLastActiveView || !pdo )
@@ -1398,7 +1397,7 @@ void CLinearGraphFrameWnd::OnEditReload()
 
 void CLinearGraphFrameWnd::OnLayoutTab()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_layoutStyle = TabbedDoc;
     UpdateWindowLayout();
@@ -1406,7 +1405,7 @@ void CLinearGraphFrameWnd::OnLayoutTab()
 
 void CLinearGraphFrameWnd::OnLayoutSingleCol()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_layoutStyle = SingleColumn;
     UpdateWindowLayout();
@@ -1414,7 +1413,7 @@ void CLinearGraphFrameWnd::OnLayoutSingleCol()
 
 void CLinearGraphFrameWnd::OnLayoutDiCol()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_layoutStyle = DoubleColumn;
     UpdateWindowLayout();
@@ -1422,7 +1421,7 @@ void CLinearGraphFrameWnd::OnLayoutDiCol()
 
 void CLinearGraphFrameWnd::OnLayoutTreCol()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_layoutStyle = TrebleColumn;
     UpdateWindowLayout();
@@ -1430,7 +1429,7 @@ void CLinearGraphFrameWnd::OnLayoutTreCol()
 
 void CLinearGraphFrameWnd::OnViewForegndClr()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1444,7 +1443,7 @@ void CLinearGraphFrameWnd::OnViewForegndClr()
 
 void CLinearGraphFrameWnd::OnViewBkgndClr()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1458,7 +1457,7 @@ void CLinearGraphFrameWnd::OnViewBkgndClr()
 
 void CLinearGraphFrameWnd::OnViewRuler()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptRuler;
     UpdateViewOptions();
@@ -1466,7 +1465,7 @@ void CLinearGraphFrameWnd::OnViewRuler()
 
 void CLinearGraphFrameWnd::OnViewHorzLine()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptHorizontalLine;
     UpdateViewOptions();
@@ -1474,7 +1473,7 @@ void CLinearGraphFrameWnd::OnViewHorzLine()
 
 void CLinearGraphFrameWnd::OnViewCoord()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptCoordinates;
     UpdateViewOptions();
@@ -1482,7 +1481,7 @@ void CLinearGraphFrameWnd::OnViewCoord()
 
 void CLinearGraphFrameWnd::OnViewLegend()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptLegend;
     UpdateViewOptions();
@@ -1490,7 +1489,7 @@ void CLinearGraphFrameWnd::OnViewLegend()
 
 void CLinearGraphFrameWnd::OnViewPosLabel()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptPositionLabel;
     UpdateViewOptions();
@@ -1498,7 +1497,7 @@ void CLinearGraphFrameWnd::OnViewPosLabel()
 
 void CLinearGraphFrameWnd::OnOptTranslucentSel()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptTranslucentSelection;
     UpdateViewOptions();
@@ -1506,7 +1505,7 @@ void CLinearGraphFrameWnd::OnOptTranslucentSel()
 
 void CLinearGraphFrameWnd::OnOptSelectTransform()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptSelectionTransform;
     UpdateViewOptions();
@@ -1514,7 +1513,7 @@ void CLinearGraphFrameWnd::OnOptSelectTransform()
 
 void CLinearGraphFrameWnd::OnViewRestore()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1526,7 +1525,7 @@ void CLinearGraphFrameWnd::OnViewRestore()
 
 void CLinearGraphFrameWnd::OnViewClearCmp()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1536,7 +1535,7 @@ void CLinearGraphFrameWnd::OnViewClearCmp()
 
 void CLinearGraphFrameWnd::OnViewZoomIn()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1546,7 +1545,7 @@ void CLinearGraphFrameWnd::OnViewZoomIn()
 
 void CLinearGraphFrameWnd::OnViewZoomOut()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( CLinearGraphViewPtr pView = GetActiveView() )
     {
@@ -1556,7 +1555,7 @@ void CLinearGraphFrameWnd::OnViewZoomOut()
 
 void CLinearGraphFrameWnd::OnAnalyzeCompare()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView )
     {
@@ -1593,7 +1592,7 @@ void CLinearGraphFrameWnd::OnAnalyzeCompare()
 
 void CLinearGraphFrameWnd::OnAnalyzeSyncSelect()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView )
     {
@@ -1633,7 +1632,7 @@ void CLinearGraphFrameWnd::OnAnalyzeSyncSelect()
 
 void CLinearGraphFrameWnd::OnAnalyzeLinear()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView || !m_pLastActiveView->GetDataObject() )
     {
@@ -1679,7 +1678,7 @@ void CLinearGraphFrameWnd::OnAnalyzeLinear()
 
 void CLinearGraphFrameWnd::OnAnalyzePower()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView || !m_pLastActiveView->GetDataObject() )
     {
@@ -1712,7 +1711,7 @@ void CLinearGraphFrameWnd::OnAnalyzePower()
 
 void CLinearGraphFrameWnd::OnAnalyzeDiff()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     if( !m_pLastActiveView || !m_pLastActiveView->GetDataObject() )
     {
@@ -1737,21 +1736,21 @@ void CLinearGraphFrameWnd::OnAnalyzeDiff()
 
 void CLinearGraphFrameWnd::OnHelpAbout()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     ::ShellExecuteW(m_hWnd, L"open", L"http://code.google.com/p/lineargraph/", 0, 0, SW_SHOW);
 }
 
 void CLinearGraphFrameWnd::OnHelpHelp()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     ::ShellExecuteW(m_hWnd, L"open", L".\\doc\\index.htm", 0, 0, SW_SHOW);
 }
 
 void CLinearGraphFrameWnd::OnFileExit()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     Close();
 }

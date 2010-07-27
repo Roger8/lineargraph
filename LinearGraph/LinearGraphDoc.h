@@ -200,8 +200,8 @@ protected:
 
     inline static int isLegalCharacter(char ch)
     {
-        return isWhitespace(ch)
-            || ch == '+' || ch == '-' || (ch >= '0' && ch <= '9');
+        return isWhitespace(ch) || (ch >= '0' && ch <= '9')
+            || ch == '+' || ch == '-' || ch == '.';
     }
 };
 

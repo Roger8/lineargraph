@@ -15,6 +15,7 @@ namespace LinearGraph
 {
     bool OpenLog();
     void Trace(PCSTR formatString, ...);
+    void Error(PCSTR formatString, ...);
     bool FlushLog();
     bool CloseLog();
 
@@ -24,16 +25,17 @@ namespace LinearGraph
 // To remove log support, just define COMPILE_WITHOUT_LOG_SUPPORT
 //
 #ifdef COMPILE_WITHOUT_LOG_SUPPORT
-#define LGTRACE_OPEN()      false
-#define LGTRACE             LinearGraph::_no_trace
-#define LGFLUSH()           false
-#define LGTRACE_CLOSE()     false
+#define LG_OPEN_LOG()      false
+#define LG_TRACE           LinearGraph::_no_trace
+#define LG_ERROR           LinearGraph::_no_trace
+#define LG_FLUSH_LOG()     false
+#define LG_CLOSE_LOG()     false
 #else
-#define LGTRACE_OPEN()      LinearGraph::OpenLog()
-#define LGTRACE             LinearGraph::Trace
-#define LGFLUSH()           LinearGraph::FlushLog()
-#define LGTRACE_CLOSE()     LinearGraph::CloseLog()
+#define LG_OPEN_LOG()      LinearGraph::OpenLog()
+#define LG_TRACE           LinearGraph::Trace
+#define LG_ERROR           LinearGraph::Error
+#define LG_FLUSH_LOG()     LinearGraph::FlushLog()
+#define LG_CLOSE_LOG()     LinearGraph::CloseLog()
 #endif
 
-#define LGTRACE_OUTOFMEMORY()   LGTRACE("Out of memory")
-#define LGTRACE_FUNCTION()      LGTRACE(__FUNCTION__)
+#define LG_TRACE_FUNCTION()      LG_TRACE(__FUNCTION__)

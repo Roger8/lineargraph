@@ -22,7 +22,7 @@ CDataObjectPtr CDataObject::CreateObject(LONG nLen)
     }
     if( !pData )
     {
-        LGTRACE("CDataObject::CreateObject Failed [length = %d]", nLen);
+        LG_TRACE("CDataObject::CreateObject Failed [length = %d]", nLen);
         return CDataObjectPtr();
     }
     return CDataObjectPtr(new CDataObject(pData, nLen));
@@ -92,7 +92,7 @@ BOOL CTextSampleFile::Open(PCWSTR szFileName)
     char*  pFileData = loadFile(szFileName, fileSize);
     if( !pFileData )
     {
-        LGTRACE("CTextSampleFile::Open::loadFile Failed [pFileData = 0]");
+        LG_TRACE("CTextSampleFile::Open::loadFile Failed [pFileData = 0]");
         return FALSE;
     }
 
@@ -104,17 +104,15 @@ BOOL CTextSampleFile::Open(PCWSTR szFileName)
 
     if( nLines >= 0x10000000 || nColumns >= 0x10000000 || !nLines || !nColumns )
     {
-        LGTRACE("CTextSampleFile::Open Failed [nLines = %d, nColumns = %d]",
+        LG_ERROR("CTextSampleFile::Open Failed [nLines = %d, nColumns = %d]",
             nLines, nColumns);
-        LGFLUSH();
         unloadFile(pFileData);
         return FALSE;
     }
 
     if( nWords != nLines*nColumns && nWords != nLines*(nColumns+1) )
     {
-        LGTRACE("CTextSampleFile::Open Failed [data corrupted]");
-        LGFLUSH();
+        LG_ERROR("CTextSampleFile::Open Failed [data corrupted]");
         unloadFile(pFileData);
         return FALSE;
     }
@@ -270,6 +268,7 @@ DWORD CTextSampleFile::countLine(const char* pData, DWORD cbSize)
     {
         if( !isLegalCharacter(pData[i]) )
         {
+            LG_ERROR("Illegal character encountered at position [%d]", i);
             return -1;
         }
         else if( '\n' == pData[i++] )
@@ -337,9 +336,8 @@ char* CTextSampleFile::loadFile(PCWSTR fileName, DWORD& fileSize)
         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if( hFile == INVALID_HANDLE_VALUE )
     {
-        LGTRACE("CTextSampleFile::loadFile::CreateFile Failed. [Error = 0x%08H]",
+        LG_ERROR("CTextSampleFile::loadFile::CreateFile Failed. [Error = 0x%08H]",
             ::GetLastError());
-        LGFLUSH();
         return 0;
     }
     fileSize = ::GetFileSize(hFile, 0);
@@ -381,18 +379,16 @@ BOOL CBinSampleFile::Open(PCWSTR szFileName)
         0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if( hFile == INVALID_HANDLE_VALUE )
     {
-        LGTRACE("CBinSampleFile::Open::CreateFile Failed [Win32 Error = 0x%08H]",
+        LG_ERROR("CBinSampleFile::Open::CreateFile Failed [Win32 Error = 0x%08H]",
             ::GetLastError());
-        LGFLUSH();
         return FALSE;
     }
 
     DWORD dwFileSize = ::GetFileSize(hFile, 0);
     if( dwFileSize <= sizeof(HeaderStruct) )
     {
-        LGTRACE("CBinSampleFile::Open Failed [File too small, size = %d]",
+        LG_ERROR("CBinSampleFile::Open Failed [File too small, size = %d]",
             dwFileSize);
-        LGFLUSH();
         ::CloseHandle(hFile);
         return FALSE;
     }
@@ -471,9 +467,8 @@ BOOL CSeedSampleFile::Open(PCWSTR szFileName)
     CSeedFile seed;
     if( !seed.open(szFileName, NULL) )
     {
-        LGTRACE("CSeedSampleFile::Open Failed [Win32 Error = 0x%08H]",
+        LG_ERROR("CSeedSampleFile::Open Failed [Win32 Error = 0x%08H]",
             ::GetLastError());
-        LGFLUSH();
         return FALSE;
     }
 
@@ -564,8 +559,7 @@ BOOL CLinearGraphDoc::Open(PCWSTR szFileName)
     }
     else
     {
-        LGTRACE("Unknown document type: %ws", szFileName);
-        LGFLUSH();
+        LG_ERROR("Unknown document type: %ws", szFileName);
     }
     return m_pFile != 0;
 }
@@ -583,7 +577,7 @@ BOOL CLinearGraphDoc::Close()
 
 ISampleFile* CLinearGraphDoc::openTextFile( PCWSTR szFileName )
 {
-    LGTRACE("Open %ws as TEXT file", szFileName);
+    LG_TRACE("Open %ws as TEXT file", szFileName);
     if( CTextSampleFile* pFile = new CTextSampleFile )
     {
         if( pFile->Open(szFileName) )
@@ -592,13 +586,12 @@ ISampleFile* CLinearGraphDoc::openTextFile( PCWSTR szFileName )
         }
         delete pFile;
     }
-    LGTRACE_OUTOFMEMORY();
     return 0;
 }
 
 ISampleFile* CLinearGraphDoc::openSeedFile( PCWSTR szFileName )
 {
-    LGTRACE("Open %ws as SEED file", szFileName);
+    LG_TRACE("Open %ws as SEED file", szFileName);
     if( CSeedSampleFile * pSeed = new CSeedSampleFile )
     {
         if( pSeed->Open(szFileName) )
@@ -607,21 +600,19 @@ ISampleFile* CLinearGraphDoc::openSeedFile( PCWSTR szFileName )
         }
         delete pSeed;
     }
-    LGTRACE_OUTOFMEMORY();
     return 0;
 }
 
 ISampleFile* CLinearGraphDoc::openEdasFile( PCWSTR szFileName )
 {
-    LGTRACE("Open %ws as EDAS file", szFileName);
-    LGTRACE("EDAS document is not supported");
-    LGFLUSH();
+    LG_TRACE("Open %ws as EDAS file", szFileName);
+    LG_ERROR("EDAS document is not supported");
     return 0;
 }
 
 ISampleFile* CLinearGraphDoc::openBinFile( PCWSTR szFileName )
 {
-    LGTRACE("Open %ws as BIN file", szFileName);
+    LG_TRACE("Open %ws as BIN file", szFileName);
     if( CBinSampleFile* pFile = new CBinSampleFile )
     {
         if( pFile->Open(szFileName) )
@@ -630,6 +621,5 @@ ISampleFile* CLinearGraphDoc::openBinFile( PCWSTR szFileName )
         }
         delete pFile;
     }
-    LGTRACE_OUTOFMEMORY();
     return 0;
 }

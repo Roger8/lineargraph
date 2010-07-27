@@ -77,6 +77,24 @@ void LinearGraph::Trace(PCSTR formatString, ...)
     }
 }
 
+void LinearGraph::Error(PCSTR formatString, ...)
+{
+    static char buff[4096];
+    if( _logLock )
+    {
+        lockLog();
+
+        va_list args;
+        va_start(args, formatString);
+        vsnprintf_s(buff, 4096, 4094, formatString, args);
+        va_end(args);
+
+        _logFile << getCurrentTime() << "ERROR " << buff << '\n';
+        _logFile << std::flush;
+        freeLog();
+    }
+}
+
 bool LinearGraph::CloseLog()
 {
     if( !_logLock ){ return false; }

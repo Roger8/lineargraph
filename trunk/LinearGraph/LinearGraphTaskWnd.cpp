@@ -92,7 +92,7 @@ void CLinearGraphTaskMonitorWnd::DelayShow()
 
 void CLinearGraphTaskMonitorWnd::Hide()
 {
-    LGTRACE("Last operation costs %dms", m_busyTime);
+    LG_TRACE("Last operation costs %dms", m_busyTime);
 
     ::KillTimer(m_hWnd, 1);
     ShowWindow(SW_HIDE);
@@ -110,14 +110,14 @@ void CLinearGraphTaskMonitorWnd::OnCommand( UINT uCode, UINT uID, HWND hCtrl )
 
 void CLinearGraphTaskMonitorWnd::OnSafeExit()
 {
-    LGTRACE_FUNCTION();
+    LG_TRACE_FUNCTION();
 
     WCHAR buff[128];
     GetString(IDS_EXIT_CONFIRM, buff, 128);
 
     if( IDYES == MessageBox(buff, MB_ICONQUESTION|MB_YESNO) )
     {
-        LGTRACE_CLOSE();
+        LG_CLOSE_LOG();
         ::ExitProcess(0);
     }
 }

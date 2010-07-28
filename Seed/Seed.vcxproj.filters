@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Seed">
+      <UniqueIdentifier>{91b52220-a6e8-4205-8012-235d51a03e50}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seed\SeedFile">
+      <UniqueIdentifier>{ad36849b-7d1c-4476-b94a-118dcbd2f8b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seed\Convert">
+      <UniqueIdentifier>{95c06d03-c672-4a48-a460-a8f902e35d7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seed\SeedLog">
+      <UniqueIdentifier>{19dd42f2-ab77-4401-ace2-228a54827dfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seed\SeedLog\OutFile">
+      <UniqueIdentifier>{96ea462c-ee5a-40b4-98b1-e9c4c75c58c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seed\Export.h">
+      <UniqueIdentifier>{7ae8d39f-d52b-462c-97b6-7c48c97e836f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Seed\Export.cpp">
+      <UniqueIdentifier>{1dc39ff1-c28c-487a-b955-2ab08326d78b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rdseedlib">
+      <UniqueIdentifier>{cc731ca8-fdbf-4357-9fd7-d07ccb95d6be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rdseedlib\operation">
+      <UniqueIdentifier>{9a06eed2-52dd-471e-b61c-3cb68b02df47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rdseedlib\operation\HeaderExtract">
+      <UniqueIdentifier>{7a57c71b-d6ae-4a26-813c-f213d78a9f8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rdseedlib\operation\Analyzetools">
+      <UniqueIdentifier>{061b550a-89ea-4e25-90c4-16efff1370e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{7b0c2725-4470-4f7b-895a-924f693b708c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ExportMacro.h">
+      <Filter>Seed</Filter>
+    </ClInclude>
+    <ClInclude Include="OperateStruct.h">
+      <Filter>Seed</Filter>
+    </ClInclude>
+    <ClInclude Include="SeedList.h">
+      <Filter>Seed</Filter>
+    </ClInclude>
+    <ClInclude Include="SeedManager.h">
+      <Filter>Seed</Filter>
+    </ClInclude>
+    <ClInclude Include="MapFile.h">
+      <Filter>Seed\SeedFile</Filter>
+    </ClInclude>
+    <ClInclude Include="SeedFile.h">
+      <Filter>Seed\SeedFile</Filter>
+    </ClInclude>
+    <ClInclude Include="StationList.h">
+      <Filter>Seed\SeedFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Convert.h">
+      <Filter>Seed\Convert</Filter>
+    </ClInclude>
+    <ClInclude Include="SeedLog.h">
+      <Filter>Seed\SeedLog</Filter>
+    </ClInclude>
+    <ClInclude Include="OutFile.h">
+      <Filter>Seed\SeedLog\OutFile</Filter>
+    </ClInclude>
+    <ClInclude Include="BinExport.h">
+      <Filter>Seed\Export.h</Filter>
+    </ClInclude>
+    <ClInclude Include="BinHeaderFormat.h">
+      <Filter>Seed\Export.h</Filter>
+    </ClInclude>
+    <ClInclude Include="Export.h">
+      <Filter>Seed\Export.h</Filter>
+    </ClInclude>
+    <ClInclude Include="MSeedExport.h">
+      <Filter>Seed\Export.h</Filter>
+    </ClInclude>
+    <ClInclude Include="SeedExport.h">
+      <Filter>Seed\Export.h</Filter>
+    </ClInclude>
+    <ClInclude Include="TxtExport.h">
+      <Filter>Seed\Export.h</Filter>
+    </ClInclude>
+    <ClInclude Include="DataRecordStruct.h">
+      <Filter>rdseedlib</Filter>
+    </ClInclude>
+    <ClInclude Include="HeaderBlockStruct.h">
+      <Filter>rdseedlib</Filter>
+    </ClInclude>
+    <ClInclude Include="rdseedlib.h">
+      <Filter>rdseedlib</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtractBlockette.h">
+      <Filter>rdseedlib\operation</Filter>
+    </ClInclude>
+    <ClInclude Include="Judge.h">
+      <Filter>rdseedlib\operation</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapTimeStrMath.h">
+      <Filter>rdseedlib\operation</Filter>
+    </ClInclude>
+    <ClInclude Include="Unpack.h">
+      <Filter>rdseedlib\operation</Filter>
+    </ClInclude>
+    <ClInclude Include="HeaderExtract.h">
+      <Filter>rdseedlib\operation\HeaderExtract</Filter>
+    </ClInclude>
+    <ClInclude Include="AnalyzeTools.h">
+      <Filter>rdseedlib\operation\Analyzetools</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>resource</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SeedList.cpp">
+      <Filter>Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="SeedManager.cpp">
+      <Filter>Seed</Filter>
+    </ClCompile>
+    <ClCompile Include="MapFile.cpp">
+      <Filter>Seed\SeedFile</Filter>
+    </ClCompile>
+    <ClCompile Include="SeedFile.cpp">
+      <Filter>Seed\SeedFile</Filter>
+    </ClCompile>
+    <ClCompile Include="StationList.cpp">
+      <Filter>Seed\SeedFile</Filter>
+    </ClCompile>
+    <ClCompile Include="Convert.cpp">
+      <Filter>Seed\Convert</Filter>
+    </ClCompile>
+    <ClCompile Include="SeedLog.cpp">
+      <Filter>Seed\SeedLog</Filter>
+    </ClCompile>
+    <ClCompile Include="OutFile.cpp">
+      <Filter>Seed\SeedLog\OutFile</Filter>
+    </ClCompile>
+    <ClCompile Include="BinExport.cpp">
+      <Filter>Seed\Export.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="MSeedExport.cpp">
+      <Filter>Seed\Export.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="SeedExport.cpp">
+      <Filter>Seed\Export.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="TxtExport.cpp">
+      <Filter>Seed\Export.cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="ExtractBlockette.cpp">
+      <Filter>rdseedlib\operation</Filter>
+    </ClCompile>
+    <ClCompile Include="Judge.cpp">
+      <Filter>rdseedlib\operation</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapTimeStrMath.cpp">
+      <Filter>rdseedlib\operation</Filter>
+    </ClCompile>
+    <ClCompile Include="Unpack.cpp">
+      <Filter>rdseedlib\operation</Filter>
+    </ClCompile>
+    <ClCompile Include="HeaderExtract.cpp">
+      <Filter>rdseedlib\operation\HeaderExtract</Filter>
+    </ClCompile>
+    <ClCompile Include="AyalyzeTools.cpp">
+      <Filter>rdseedlib\operation\Analyzetools</Filter>
+    </ClCompile>
+    <ClCompile Include="DataRecordCtrl.cpp">
+      <Filter>rdseedlib\operation\Analyzetools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Seed.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

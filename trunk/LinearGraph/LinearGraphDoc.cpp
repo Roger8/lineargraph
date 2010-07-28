@@ -258,7 +258,10 @@ void CTextSampleFile::asciiTimeToFileTime(LONGLONG& t)
 
 bool CTextSampleFile::isFirstColumnTimeStamp(const char* pData)
 {
-    return _atoi64(pData) > 0x0FFFFFFFF;
+    // Compare with 1900010100, which is the minimum value accepted as a decimal
+    //string represented timestamp
+    //
+    return _atoi64(pData) > 0x0713FDA74;
 }
 
 DWORD CTextSampleFile::countLine(const char* pData, DWORD cbSize)

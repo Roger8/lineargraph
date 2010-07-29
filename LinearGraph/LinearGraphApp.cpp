@@ -176,7 +176,8 @@ void CLinearGraphApp::BeginHeavyTask()
     ::SetCursor(::LoadCursor(0, IDC_WAIT));
     if( m_pMainWnd )
     {
-        m_pMainWnd->Enable(FALSE);
+        m_pMainWnd->ShowWindow(SW_HIDE);
+        //m_pMainWnd->Enable(FALSE);
         //::AttachThreadInput(::GetCurrentThreadId(), m_dwMonitorID, TRUE);
     }
     m_taskWnd.DelayShow();
@@ -205,7 +206,8 @@ void CLinearGraphApp::EndHeavyTask()
     if( m_pMainWnd )
     {
         //::AttachThreadInput(::GetCurrentThreadId(), m_dwMonitorID, FALSE);
-        m_pMainWnd->Enable(TRUE);
+        //m_pMainWnd->Enable(TRUE);
+        m_pMainWnd->ShowWindow();
         m_pMainWnd->SetForegroundWindow();
     }
 }

@@ -684,21 +684,31 @@ void CLinearGraphView::DrawRuler(HDC dc, CRectangle& rcCanvas, CRectangle& rcCli
     HGDIOBJ hOldPen;
     hOldPen = ::SelectObject(dc, (HPEN)penRuler);
 
-    LONG vSections = max(rcCanvas.Height()/10, 3);
-    LONG hSections = max(rcCanvas.Width()/10, 3);
-
-    LONG vScope = rcClip.Height();
-    LONG hScope = rcClip.Width();
-
-    LONG vUnit = 10, hUnit = 10;
-    for(; vUnit * vSections < vScope; vUnit += 10);
-    for(; hUnit * hSections < hScope; hUnit += 10);
-
     POINT ptStart = {rcCanvas.xMin, rcCanvas.yMax};
     ClientPtToGraphPt(ptStart);
 
+    LONG vUnit;
+    LONG vSections = max(rcCanvas.Height()/10, 3);
+    LONG vScope = rcClip.Height();
+    for(vUnit  = 10; vUnit * vSections < vScope; vUnit += 10);
     DrawVerticalAxis(dc, ptStart, vSections, vUnit);
-    DrawHorizontalAxis(dc, ptStart, hSections, hUnit);
+
+    if( m_pData->hasTimestamp() && (m_dwOptionSet & OptTimeLabelOnHAxis) )
+    {
+        LONG splitMethod;
+        LONG startValue;
+        SplitTimeAxis(rcClip, startValue, splitMethod);
+        DrawTimeAxis(dc, ptStart, startValue, splitMethod);
+    }
+    else
+    {
+        LONG hUnit;
+        LONG hSections = max(rcCanvas.Width()/10, 3);
+        LONG hScope = rcClip.Width();
+        for(hUnit = 10; hUnit * hSections < hScope; hUnit += 10);
+        DrawHorizontalAxis(dc, ptStart, hSections, hUnit);
+    }
+
     ::SelectObject(dc, hOldPen);
 }
 
@@ -746,6 +756,67 @@ void CLinearGraphView::DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, L
     }
 }
 
+void CLinearGraphView::SplitTimeAxis(CRectangle& rcClip, LONG& startValue, LONG& splitMethod)
+{
+    LONGLONG t64;
+    SYSTEMTIME stBegin, stEnd;
+
+    t64 = m_pData->timeStamp + rcClip.xMin * m_pData->freqMulti / m_pData->freqBase;
+    ::FileTimeToSystemTime((FILETIME*)&t64, &stBegin);
+    t64 = m_pData->timeStamp + rcClip.xMax * m_pData->freqMulti / m_pData->freqBase;
+    ::FileTimeToSystemTime((FILETIME*)&t64, &stBegin);
+
+    if( stEnd.wYear != stBegin.wYear )
+    {
+        splitMethod = SplitByYear;
+        if( stEnd.wMonth-stBegin.wMonth + (stEnd.wYear-stBegin.wYear)*12 < 13 )
+        {
+            // timespan less than 13 months, split by month
+            ++splitMethod;
+        }
+    }
+    else if( stEnd.wMonth != stBegin.wMonth )
+    {
+        splitMethod = SplitByMonth;
+        if( stEnd.wDay-stBegin.wDay + (stEnd.wMonth-stBegin.wMonth)*30 < 30 )
+        {
+            // timespan less than month days, split by day
+            ++splitMethod;
+        }
+    }
+    else if( stEnd.wDay != stBegin.wDay )
+    {
+        splitMethod = SplitByDay;
+        if( stEnd.wHour-stBegin.wHour + (stEnd.wDay-stBegin.wDay)*24 < 25 )
+        {
+            // timespan less than 25 hours, split by hour
+            ++splitMethod;
+        }
+    }
+    else if( stEnd.wHour != stBegin.wHour )
+    {
+        splitMethod = SplitByHour;
+        if( stEnd.wMinute-stBegin.wMinute+ (stEnd.wHour-stBegin.wHour)*60 < 61 )
+        {
+            // timespan less than 61 minutes, split by minute
+            ++splitMethod;
+        }
+    }
+    else if( stEnd.wMinute != stBegin.wMinute )
+    {
+        splitMethod = SplitByMinute;
+        if( stEnd.wSecond-stBegin.wSecond + (stEnd.wMinute-stBegin.wMinute)*60 < 61 )
+        {
+            // timespan less than 61 seconds, split by second
+            ++splitMethod;
+        }
+    }
+    else
+    {
+        splitMethod = SplitBySecond; // split by second
+    }
+}
+
 void CLinearGraphView::DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit)
 {
     POINT apt[2] = {ptStart, {ptStart.x+nUnit*nSections, ptStart.y}};
@@ -788,6 +859,20 @@ void CLinearGraphView::DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections,
         }
         ::Polyline(dc, apt, 2);
     }
+}
+
+void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, LONG startValue, LONG splitMethod)
+{
+    CRectangle rcClip;
+    GetClipRectangle(rcClip);
+
+    POINT apt[2] = {ptStart};
+    GraphPtToClientPt(apt[0]);
+    apt[1].x = apt[0].x + rcClip.Width();
+    ::Polyline(dc, apt, 2);
+
+    RECT  rectText;
+    WCHAR textBuff[32];
 }
 
 void CLinearGraphView::DrawIndicationLine(HDC dc)

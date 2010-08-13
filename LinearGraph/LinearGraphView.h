@@ -105,6 +105,7 @@ public:
         OptTranslucentSelection = 0x0008,
         OptLegend = 0x0010,
         OptCoordinates = 0x0020,
+        OptTimeLabelOnHAxis = 0x0040,
         OptSelectionTransform = 0x1000,
     };
 
@@ -184,8 +185,20 @@ private:
     void DrawLegend(HDC dc, RECT& rcLegend, COLORREF clr, PCWSTR szName);
     void DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit);
     void DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit);
+    void DrawTimeAxis(HDC dc, POINT ptStart, LONG startValue, LONG splitMethod);
     void ResizeClipWindow(int ds, BOOL bHorz);
     void MoveClipWindow(int ds, BOOL bHorz);
+    void SplitTimeAxis(CRectangle& rcClip, LONG& startValue, LONG& splitMethod);
+
+    enum TimeSplitMethod
+    {
+        SplitByYear = -6,
+        SplitByMonth,
+        SplitByDay,
+        SplitByHour,
+        SplitByMinute,
+        SplitBySecond
+    };
 
 protected:
     DWORD       m_dwOptionSet;

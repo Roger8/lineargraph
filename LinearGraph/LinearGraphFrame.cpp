@@ -313,14 +313,9 @@ BOOL CDateTimeDialog::OnInitDialog()
     m_editTimeMs.SetLimitText(3);
 
     WCHAR buff[16];
-    _snwprintf_s(buff, 16, 4, L"%d", m_stDateTime.wMilliseconds);
-    m_editTimeMs.SetText(buff);
-
-    _snwprintf_s(buff, 16, 14, L"%d", m_dwFreqMulti);
-    m_editFreqMulti.SetText(buff);
-
-    _snwprintf_s(buff, 16, 14, L"%d", m_dwFreqBase);
-    m_editFreqBase.SetText(buff);
+    m_editTimeMs.SetText(_itow(m_stDateTime.wMilliseconds, buff, 10));
+    m_editFreqMulti.SetText(_itow(m_dwFreqMulti, buff, 10));
+    m_editFreqBase.SetText(_itow(m_dwFreqBase, buff, 10));
 
     if( m_stDateTime.wYear )
     {
@@ -762,6 +757,7 @@ void CLinearGraphFrameWnd::OnCommand(UINT uCode, UINT uID, HWND hCtrl)
     case ID_VIEW_ZOOMOUT:       return OnViewZoomOut();
     case ID_VIEW_RESTORE:       return OnViewRestore();
     case ID_VIEW_POSLABEL:      return OnViewPosLabel();
+    case ID_VIEW_SHOWTIMEAXIS:  return OnViewShowTimeAxis();
     case ID_VIEW_COORD:         return OnViewCoord();
     case ID_VIEW_LEGEND:        return OnViewLegend();
     case ID_VIEW_CLEARCMP:      return OnViewClearCmp();
@@ -869,6 +865,9 @@ void CLinearGraphFrameWnd::OnInitMenuPopup(HMENU hMenu, UINT nPos, BOOL bIsWindo
 
             mii.fState = (m_dwViewOpts & CLinearGraphView::OptPositionLabel) ? MFS_CHECKED : 0;
             ::SetMenuItemInfo(hMenu, ID_VIEW_POSLABEL, FALSE, &mii);
+
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptTimeLabelOnHAxis) ? MFS_CHECKED : 0;
+            ::SetMenuItemInfo(hMenu, ID_VIEW_SHOWTIMEAXIS, FALSE, &mii);
         }
         break;
     case AnalyzeMenu:
@@ -906,6 +905,7 @@ void CLinearGraphFrameWnd::OnDropFiles(HDROP hDrop)
 
     cFiles = ::DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0);
     LG_TRACE("%d documents by drop", cFiles);
+    BeginHeavyTask();
 
     for(int i = 0; i < cFiles; i++)
     {
@@ -913,6 +913,8 @@ void CLinearGraphFrameWnd::OnDropFiles(HDROP hDrop)
         if( fileName = new WCHAR[cchSize + 2] )
         {
             ::DragQueryFile(hDrop, i, fileName, cchSize+2);
+            
+            EnterHeavyFileTask(fileName);
             if( !OpenDocument(fileName) )
             {
                 WCHAR errString[128];
@@ -926,16 +928,14 @@ void CLinearGraphFrameWnd::OnDropFiles(HDROP hDrop)
         }
     }
 
+    EndHeavyTask();
     ::DragFinish(hDrop);
 }
 
 BOOL CLinearGraphFrameWnd::OnOpenDocument(PCWSTR szFileName)
 {
     LG_TRACE_FUNCTION();
-
-    BeginHeavyTask();
-    EnterHeavyOpenTask(szFileName);
-
+    
     CLinearGraphDoc doc;
     if( !doc.Open(szFileName) )
     {
@@ -973,7 +973,6 @@ BOOL CLinearGraphFrameWnd::OnOpenDocument(PCWSTR szFileName)
         m_pLastActiveView = pView;
         m_toolPanel.SetActiveViewTab( m_toolPanel.AddTab(pData->name) );
     }
-    EndHeavyTask();
 
     UpdateWindowLayout();
     UpdateStatusPanel();
@@ -1039,6 +1038,8 @@ void CLinearGraphFrameWnd::OnFileOpen()
         dirName.AppendChar(L'\\');
     }
 
+    BeginHeavyTask();
+
     WCHAR fileName[8192];
     for(size_t off = ofn.nFileOffset; off < 8190; off += wcslen(nameBuff+off) + 1)
     {
@@ -1050,6 +1051,7 @@ void CLinearGraphFrameWnd::OnFileOpen()
         wcscpy_s(fileName, 8192, dirName);
         wcscat_s(fileName, 8192, nameBuff+off);
 
+        EnterHeavyFileTask(fileName);
         if( !OpenDocument(fileName) )
         {
             CString infoString;
@@ -1057,6 +1059,8 @@ void CLinearGraphFrameWnd::OnFileOpen()
             MessageBox(infoString, MB_ICONERROR|MB_OK);
         }
     }
+
+    EndHeavyTask();
 }
 
 void CLinearGraphFrameWnd::OnFileSaveImage()
@@ -1278,7 +1282,8 @@ BOOL CLinearGraphFrameWnd::SaveDataToFile(const CDataObjectPtr pdo, CRectangle* 
         {
             for(LONG i = 0; i < cData; ++i)
             {
-                ::WriteFile(hFile, buff, sprintf(buff, "%d\n", pData[i]), &dwBytes, 0);
+                ::WriteFile(hFile, buff, strlen(itoa(pData[i], buff, 10)), &dwBytes, 0);
+                ::WriteFile(hFile, "\n", 1, &dwBytes, 0);
             }
         }
         break;
@@ -1378,7 +1383,7 @@ void CLinearGraphFrameWnd::OnEditReload()
     }
 
     BeginHeavyTask();
-    EnterHeavyOpenTask(pdo->ownerFile);
+    EnterHeavyFileTask(pdo->ownerFile);
    
     CLinearGraphDoc doc;
     if( doc.Open(pdo->ownerFile) )
@@ -1492,6 +1497,14 @@ void CLinearGraphFrameWnd::OnViewPosLabel()
     LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptPositionLabel;
+    UpdateViewOptions();
+}
+
+void CLinearGraphFrameWnd::OnViewShowTimeAxis()
+{
+    LG_TRACE_FUNCTION();
+
+    m_dwViewOpts ^= CLinearGraphView::OptTimeLabelOnHAxis;
     UpdateViewOptions();
 }
 

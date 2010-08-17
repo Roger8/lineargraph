@@ -33,12 +33,11 @@ int CLinearGraphTaskMonitorWnd::PreProcessMessage(UINT msg, WPARAM wp, LPARAM lp
     {
     case WM_TIMER:
         {
-            if( 0 == m_busyTime )
+            if( !m_busyTime )
             {
                 ShowWindow();
             }
             m_busyTime += 100;
-
         }
         break;
     case WM_CTLCOLORBTN:

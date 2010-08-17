@@ -115,6 +115,11 @@ public:
         StepStretchRate = 16
     };
 
+    enum DatePrecision
+    {
+        Year = 0, Month, Day, Hour, Minute, Second
+    };
+
     COLORREF GetForegroundColor() const;
     COLORREF GetBackgroundColor() const;
     BOOL GetNameFontSize(CString& name, LONG& lHeight) const;
@@ -138,7 +143,8 @@ public:
     BOOL GetCanvasRectangle(CRectangle& rcCanvas) const;
     BOOL GetDataRectangle(CRectangle& rcData) const;
     BOOL ClientPtToGraphPt(POINT& pt) const;
-    BOOL GraphPtToFileTime(LONG x, LONGLONG& t) const;
+    BOOL TimeToIndex(LONGLONG t, LONG& x) const;
+    BOOL IndexToTime(LONG x, LONGLONG& t) const;
     BOOL GraphPtToClientPt(POINT& pt) const;
 
     BOOL ZoomIn();
@@ -185,20 +191,10 @@ private:
     void DrawLegend(HDC dc, RECT& rcLegend, COLORREF clr, PCWSTR szName);
     void DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit);
     void DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit);
-    void DrawTimeAxis(HDC dc, POINT ptStart, LONG startValue, LONG splitMethod);
+    void DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, SYSTEMTIME& stEnd);
     void ResizeClipWindow(int ds, BOOL bHorz);
     void MoveClipWindow(int ds, BOOL bHorz);
-    void SplitTimeAxis(CRectangle& rcClip, LONG& startValue, LONG& splitMethod);
-
-    enum TimeSplitMethod
-    {
-        SplitByYear = -6,
-        SplitByMonth,
-        SplitByDay,
-        SplitByHour,
-        SplitByMinute,
-        SplitBySecond
-    };
+    DatePrecision CalcTimeAxisPrecision(SYSTEMTIME& stBegin, SYSTEMTIME& stEnd);
 
 protected:
     DWORD       m_dwOptionSet;

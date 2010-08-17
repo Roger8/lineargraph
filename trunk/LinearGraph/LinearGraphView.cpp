@@ -676,6 +676,59 @@ void CLinearGraphView::MoveClipWindow(int ds, BOOL bHorz)
     SetClipRectangle(rcClip);
 }
 
+CLinearGraphView::DatePrecision CLinearGraphView::CalcTimeAxisPrecision(
+    SYSTEMTIME& stBegin, SYSTEMTIME& stEnd )
+{
+    DatePrecision datePrecision = Second;
+    if( stEnd.wYear != stBegin.wYear )
+    {
+        datePrecision = Year;
+        if( stEnd.wMonth-stBegin.wMonth + (stEnd.wYear-stBegin.wYear)*12 < 13 )
+        {
+            // timespan less than 13 months, split by month
+            datePrecision = Month;
+        }
+    }
+    else if( stEnd.wMonth != stBegin.wMonth )
+    {
+        datePrecision = Month;
+        if( stEnd.wDay-stBegin.wDay + (stEnd.wMonth-stBegin.wMonth)*30 < 30 )
+        {
+            // timespan less than month days, split by day
+            datePrecision = Day;
+        }
+    }
+    else if( stEnd.wDay != stBegin.wDay )
+    {
+        datePrecision = Day;
+        if( stEnd.wHour-stBegin.wHour + (stEnd.wDay-stBegin.wDay)*24 < 25 )
+        {
+            // timespan less than 25 hours, split by hour
+            datePrecision = Hour;
+        }
+    }
+    else if( stEnd.wHour != stBegin.wHour )
+    {
+        datePrecision = Hour;
+        if( stEnd.wMinute-stBegin.wMinute+ (stEnd.wHour-stBegin.wHour)*60 < 61 )
+        {
+            // timespan less than 61 minutes, split by minute
+            datePrecision = Minute;
+        }
+    }
+    else if( stEnd.wMinute != stBegin.wMinute )
+    {
+        datePrecision = Minute;
+        if( stEnd.wSecond-stBegin.wSecond + (stEnd.wMinute-stBegin.wMinute)*60 < 61 )
+        {
+            // timespan less than 61 seconds, split by second
+            datePrecision = Second;
+        }
+    }
+
+    return datePrecision;
+}
+
 void CLinearGraphView::DrawRuler(HDC dc, CRectangle& rcCanvas, CRectangle& rcClip)
 {
     CPen penRuler(RGB(0x29,0x39,0x55));
@@ -695,10 +748,16 @@ void CLinearGraphView::DrawRuler(HDC dc, CRectangle& rcCanvas, CRectangle& rcCli
 
     if( m_pData->hasTimestamp() && (m_dwOptionSet & OptTimeLabelOnHAxis) )
     {
-        LONG splitMethod;
-        LONG startValue;
-        SplitTimeAxis(rcClip, startValue, splitMethod);
-        DrawTimeAxis(dc, ptStart, startValue, splitMethod);
+        LONGLONG t64;
+        SYSTEMTIME stBegin, stEnd;
+        t64 = m_pData->timeStamp
+            + rcClip.xMin*(LONGLONG)10000000*m_pData->freqBase/m_pData->freqMulti;
+        ::FileTimeToSystemTime((FILETIME*)&t64, &stBegin);
+        t64 = m_pData->timeStamp
+            + rcClip.xMax*(LONGLONG)10000000*m_pData->freqBase/m_pData->freqMulti;
+        ::FileTimeToSystemTime((FILETIME*)&t64, &stEnd);
+
+        DrawTimeAxis(dc, ptStart, stBegin, stEnd);
     }
     else
     {
@@ -741,79 +800,18 @@ void CLinearGraphView::DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, L
                 
                 if( m_dwOptionSet & OptCoordinates )
                 {
-                    ::_snwprintf_s(textBuff, 32, 30, L"%d", y);
+                    _itow(y, textBuff, 10);
 
                     rectText.left = apt[1].x+4;
                     rectText.right= rectText.left + 120;
                     rectText.top = apt[1].y-16;
                     rectText.bottom = rectText.top + 32;
-                    ::DrawTextW(dc, textBuff, wcslen(textBuff),
-                        &rectText, DT_SINGLELINE|DT_LEFT|DT_VCENTER);
+                    ::DrawTextW(dc, textBuff, wcslen(textBuff), &rectText,
+                        DT_SINGLELINE|DT_LEFT|DT_VCENTER);
                 }
             }
         }
         ::Polyline(dc, apt, 2);
-    }
-}
-
-void CLinearGraphView::SplitTimeAxis(CRectangle& rcClip, LONG& startValue, LONG& splitMethod)
-{
-    LONGLONG t64;
-    SYSTEMTIME stBegin, stEnd;
-
-    t64 = m_pData->timeStamp + rcClip.xMin * m_pData->freqMulti / m_pData->freqBase;
-    ::FileTimeToSystemTime((FILETIME*)&t64, &stBegin);
-    t64 = m_pData->timeStamp + rcClip.xMax * m_pData->freqMulti / m_pData->freqBase;
-    ::FileTimeToSystemTime((FILETIME*)&t64, &stBegin);
-
-    if( stEnd.wYear != stBegin.wYear )
-    {
-        splitMethod = SplitByYear;
-        if( stEnd.wMonth-stBegin.wMonth + (stEnd.wYear-stBegin.wYear)*12 < 13 )
-        {
-            // timespan less than 13 months, split by month
-            ++splitMethod;
-        }
-    }
-    else if( stEnd.wMonth != stBegin.wMonth )
-    {
-        splitMethod = SplitByMonth;
-        if( stEnd.wDay-stBegin.wDay + (stEnd.wMonth-stBegin.wMonth)*30 < 30 )
-        {
-            // timespan less than month days, split by day
-            ++splitMethod;
-        }
-    }
-    else if( stEnd.wDay != stBegin.wDay )
-    {
-        splitMethod = SplitByDay;
-        if( stEnd.wHour-stBegin.wHour + (stEnd.wDay-stBegin.wDay)*24 < 25 )
-        {
-            // timespan less than 25 hours, split by hour
-            ++splitMethod;
-        }
-    }
-    else if( stEnd.wHour != stBegin.wHour )
-    {
-        splitMethod = SplitByHour;
-        if( stEnd.wMinute-stBegin.wMinute+ (stEnd.wHour-stBegin.wHour)*60 < 61 )
-        {
-            // timespan less than 61 minutes, split by minute
-            ++splitMethod;
-        }
-    }
-    else if( stEnd.wMinute != stBegin.wMinute )
-    {
-        splitMethod = SplitByMinute;
-        if( stEnd.wSecond-stBegin.wSecond + (stEnd.wMinute-stBegin.wMinute)*60 < 61 )
-        {
-            // timespan less than 61 seconds, split by second
-            ++splitMethod;
-        }
-    }
-    else
-    {
-        splitMethod = SplitBySecond; // split by second
     }
 }
 
@@ -846,14 +844,14 @@ void CLinearGraphView::DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections,
 
                 if( m_dwOptionSet & OptCoordinates )
                 {
-                    ::_snwprintf_s(textBuff, 32, 30, L"%d", x);
+                    _itow(x, textBuff, 10);
 
                     rectText.left = apt[1].x;
                     rectText.right= rectText.left + 120;
                     rectText.bottom = apt[1].y - 4;
                     rectText.top = rectText.bottom - 32;
-                    ::DrawTextW(dc, textBuff, wcslen(textBuff),
-                        &rectText, DT_SINGLELINE|DT_LEFT|DT_BOTTOM);
+                    ::DrawTextW(dc, textBuff, wcslen(textBuff), &rectText,
+                        DT_SINGLELINE|DT_LEFT|DT_BOTTOM);
                 }
             }
         }
@@ -861,18 +859,127 @@ void CLinearGraphView::DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections,
     }
 }
 
-void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, LONG startValue, LONG splitMethod)
+void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, SYSTEMTIME& stEnd)
 {
     CRectangle rcClip;
     GetClipRectangle(rcClip);
 
-    POINT apt[2] = {ptStart};
+    POINT apt[2] = {ptStart, {ptStart.x+rcClip.Width(), ptStart.y}};
     GraphPtToClientPt(apt[0]);
-    apt[1].x = apt[0].x + rcClip.Width();
+    GraphPtToClientPt(apt[1]);
     ::Polyline(dc, apt, 2);
 
-    RECT  rectText;
-    WCHAR textBuff[32];
+    DatePrecision datePrecision;
+    datePrecision = CalcTimeAxisPrecision(stBegin, stEnd);
+
+    SYSTEMTIME sectDate = {0};
+    sectDate.wMonth = sectDate.wDay = 1;
+
+    switch( datePrecision )
+    {
+    case Second:
+        sectDate.wSecond = stBegin.wSecond;
+    case Minute:
+        sectDate.wMinute = stBegin.wMinute;
+    case Hour:
+        sectDate.wHour = stBegin.wHour;
+    case Day:
+        sectDate.wDay = stBegin.wDay;
+    case Month:
+        sectDate.wMonth = stBegin.wMonth;
+    case Year:
+        sectDate.wYear = stBegin.wYear;
+    }
+
+    WCHAR unitName[16] = {0};
+    GetString(IDS_DATETIMEUNIT, unitName, 16);
+
+    LONGLONG t, tEnd;
+    ::SystemTimeToFileTime(&stEnd, (FILETIME*)&tEnd);
+    ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
+
+    size_t cchText;
+    WCHAR  labelBuff[32];
+
+    while( t < tEnd )
+    {
+        switch( datePrecision )
+        {
+        case Second:
+            {
+                t += 10000000;
+                ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
+                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                    sectDate.wMinute, unitName[Minute],
+                    sectDate.wSecond, unitName[Second]);
+            }
+            break;
+        case Minute:
+            {
+                t += 600000000;
+                ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
+                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                    sectDate.wHour, unitName[Hour],
+                    sectDate.wMinute, unitName[Second]);
+            }
+            break;
+        case Hour:
+            {
+                t += 36000000000;
+                ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
+                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                    sectDate.wDay, unitName[Day],
+                    sectDate.wHour, unitName[Hour]);
+            }
+            break;
+        case Day:
+            {
+                t += 864000000000;
+                ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
+                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                    sectDate.wMonth, unitName[Month],
+                    sectDate.wDay, unitName[Day]);
+            }
+            break;
+        case Month:
+            {
+                if( sectDate.wMonth < 12 )
+                {
+                    ++sectDate.wMonth;
+                }
+                else
+                {
+                    ++sectDate.wYear;
+                    sectDate.wMonth = 1;
+                }
+                ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
+                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                    sectDate.wYear, unitName[Year],
+                    sectDate.wMonth, unitName[Month]);
+            }
+            break;
+        case Year:
+            {
+                ++sectDate.wYear;
+                ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
+                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                    sectDate.wYear, unitName[Year],
+                    sectDate.wMonth, unitName[Month]);
+            }
+            break;
+        }
+
+        TimeToIndex(t, apt[0].x);
+        apt[0].y = rcClip.yMin;
+        GraphPtToClientPt(apt[0]);
+        apt[1].x = apt[0].x;
+        apt[1].y = apt[0].y - 8;
+        ::Polyline(dc, apt, 2);
+
+        RECT rcText = {apt[1].x-60, apt[1].y-24, apt[1].x+60, apt[1].y};
+        ::DrawTextW(dc, labelBuff, cchText, &rcText,
+            DT_SINGLELINE|DT_CENTER|DT_BOTTOM);
+    }
 }
 
 void CLinearGraphView::DrawIndicationLine(HDC dc)
@@ -1073,13 +1180,13 @@ int CLinearGraphView::GetPositionLabel(PWSTR labelBuff, int cchSize) const
     POINT pt = {m_nCursorX, m_nCursorY};
     ClientPtToGraphPt(pt);
 
-    int cchText = ::_snwprintf(labelBuff, 36, L"[%d, %d]", pt.x, pt.y);
-    if( GraphPtToFileTime(pt.x, t) )
+    int cchText = ::swprintf(labelBuff, L"[%d, %d]", pt.x, pt.y);
+    if( IndexToTime(pt.x, t) )
     {
         SYSTEMTIME sysTime = {0};
         ::FileTimeToSystemTime((FILETIME*)&t, &sysTime);
 
-        cchText +=::_snwprintf(labelBuff+cchText, cchSize-cchText,
+        cchText +=::swprintf(labelBuff+cchText, cchSize-cchText,
             L"\n%04d/%02d/%02d %02d:%02d:%02d.%03d",
             sysTime.wYear, sysTime.wMonth, sysTime.wDay,
             sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);
@@ -1261,13 +1368,23 @@ BOOL CLinearGraphView::ClientPtToGraphPt(POINT& pt) const
     return TRUE;
 }
 
-BOOL CLinearGraphView::GraphPtToFileTime(LONG x, LONGLONG& t) const
+BOOL CLinearGraphView::IndexToTime(LONG x, LONGLONG& t) const
 {
     if( !m_pData->hasTimestamp() )
     {
         return FALSE;
     }
     t = m_pData->timeStamp + (LONGLONG)x * 10000000 * m_pData->freqBase / m_pData->freqMulti;
+    return TRUE;
+}
+
+BOOL CLinearGraphView::TimeToIndex(LONGLONG t, LONG& x) const
+{
+    if( !m_pData->hasTimestamp() )
+    {
+        return FALSE;
+    }
+    x = (t - m_pData->timeStamp) * m_pData->freqMulti / 10000000 / m_pData->freqBase;
     return TRUE;
 }
 

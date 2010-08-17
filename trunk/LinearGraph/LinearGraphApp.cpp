@@ -79,10 +79,13 @@ BOOL CLinearGraphApp::OnInitApplication()
     INT     argc = 0;
     WCHAR** argv = 0;
     argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-
+    
+    BeginHeavyTask();
     for(int i = 1; i < argc; i++)
     {
         LG_TRACE("Open document from command line: %ws", argv[i]);
+        
+        EnterHeavyFileTask(argv[i]);
         if( !pFrameWnd->OpenDocument(argv[i]) )
         {
             GetString(IDS_ERR_OPEN_FAILED, reasonString, 128);
@@ -92,6 +95,7 @@ BOOL CLinearGraphApp::OnInitApplication()
             pFrameWnd->MessageBox(strMsg, MB_ICONWARNING);
         }
     }
+    EndHeavyTask();
 
     ::SetForegroundWindow(m_pMainWnd->m_hWnd);
     return TRUE;
@@ -190,7 +194,7 @@ void CLinearGraphApp::EnterHeavyTaskStep(UINT stepStrinID)
     m_taskWnd.SetStatusText(buff);
 }
 
-void CLinearGraphApp::EnterHeavyOpenTask(PCWSTR fileName)
+void CLinearGraphApp::EnterHeavyFileTask(PCWSTR fileName)
 {
     WCHAR buff[2048];
     ::LoadStringW(::GetModuleHandle(0), IDS_OPEN_DOCUMENT, buff, 256);

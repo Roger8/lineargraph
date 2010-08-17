@@ -24,7 +24,7 @@ public:
 
     void BeginHeavyTask();
     void EnterHeavyTaskStep(UINT stepStrinID);
-    void EnterHeavyOpenTask(PCWSTR fileName);
+    void EnterHeavyFileTask(PCWSTR fileName);
     void EndHeavyTask();
 
 private:

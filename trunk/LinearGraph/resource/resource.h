@@ -51,6 +51,7 @@
 #define IDS_ERR_OSVER_LOW               158
 #define IDS_ERR_OUT_OF_MEMORY           159
 #define IDS_ERR_GMEM_OVER               160
+#define IDS_DATETIMEUNIT                161
 #define IDC_BTN_OK                      1002
 #define IDC_EDIT_INFO                   1020
 #define IDC_BTN_CANCEL                  1022
@@ -108,13 +109,16 @@
 #define ID_LAYOUT_TRECOL                40037
 #define ID_HELP_HELP                    40038
 #define ID_EDIT_RELOAD                  40040
+#define ID_40043                        40043
+#define ID_VIEW_                        40044
+#define ID_VIEW_SHOWTIMEAXIS            40045
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40043
+#define _APS_NEXT_COMMAND_VALUE         40046
 #define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

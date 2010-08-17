@@ -10,8 +10,7 @@ const char* getCurrentTime()
     SYSTEMTIME stNow = {0};
     ::GetLocalTime(&stNow);
 
-    ::sprintf_s(_timeStringBuff, 128,
-        "[%04d-%02d-%02d %02d:%02d:%02d.%03d] ",
+    ::sprintf(_timeStringBuff, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] ",
         (DWORD)stNow.wYear, (DWORD)stNow.wMonth, (DWORD)stNow.wDay,
         (DWORD)stNow.wHour, (DWORD)stNow.wMinute,
         (DWORD)stNow.wSecond, (DWORD)stNow.wMilliseconds);

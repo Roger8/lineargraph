@@ -210,9 +210,9 @@ private:
         CLinearGraphApp::GetApp()->EnterHeavyTaskStep(stepStrinID);
     }
 
-    void EnterHeavyOpenTask(PCWSTR fileName)
+    void EnterHeavyFileTask(PCWSTR fileName)
     {
-        CLinearGraphApp::GetApp()->EnterHeavyOpenTask(fileName);
+        CLinearGraphApp::GetApp()->EnterHeavyFileTask(fileName);
     }
 
     void EndHeavyTask()
@@ -252,6 +252,7 @@ private:
     void OnViewCoord();
     void OnViewLegend();
     void OnViewPosLabel();
+    void OnViewShowTimeAxis();
     void OnViewRestore();
     void OnViewZoomIn();
     void OnViewZoomOut();

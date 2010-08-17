@@ -200,8 +200,8 @@ BEGIN
         MENUITEM "位置标签\tCtrl+L",                ID_VIEW_POSLABEL
         MENUITEM "横轴显示时间刻度",                    ID_VIEW_SHOWTIMEAXIS
         MENUITEM SEPARATOR
-        MENUITEM "清除比较曲线\tF11",                 ID_VIEW_CLEARCMP
-        MENUITEM "全景视图\tF12",                   ID_VIEW_RESTORE
+        MENUITEM "清除比较曲线\tF12",                 ID_VIEW_CLEARCMP
+        MENUITEM "全景视图\tF11",                   ID_VIEW_RESTORE
         MENUITEM SEPARATOR
         MENUITEM "放大\tCtrl++",                  ID_VIEW_ZOOMIN
         MENUITEM "缩小\tCtrl+-",                  ID_VIEW_ZOOMOUT
@@ -375,11 +375,11 @@ BEGIN
     "X",            ID_LAYOUT_TAB,          VIRTKEY, SHIFT, NOINVERT
     "T",            ID_LAYOUT_TRECOL,       VIRTKEY, SHIFT, NOINVERT
     "B",            ID_VIEW_BKGNDCLR,       VIRTKEY, SHIFT, CONTROL, NOINVERT
-    VK_F11,         ID_VIEW_CLEARCMP,       VIRTKEY, NOINVERT
+    VK_F12,         ID_VIEW_CLEARCMP,       VIRTKEY, NOINVERT
     "F",            ID_VIEW_FOREGNDCLR,     VIRTKEY, SHIFT, CONTROL, NOINVERT
     "H",            ID_VIEW_HORZLINE,       VIRTKEY, CONTROL, NOINVERT
     "L",            ID_VIEW_POSLABEL,       VIRTKEY, CONTROL, NOINVERT
-    VK_F12,         ID_VIEW_RESTORE,        VIRTKEY, NOINVERT
+    VK_F11,         ID_VIEW_RESTORE,        VIRTKEY, NOINVERT
     "R",            ID_VIEW_RULER,          VIRTKEY, CONTROL, NOINVERT
     VK_OEM_PLUS,    ID_VIEW_ZOOMIN,         VIRTKEY, CONTROL, NOINVERT
     VK_OEM_MINUS,   ID_VIEW_ZOOMOUT,        VIRTKEY, CONTROL, NOINVERT

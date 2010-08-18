@@ -89,6 +89,15 @@ void LinearGraph::Error(PCSTR formatString, ...)
         va_end(args);
 
         _logFile << getCurrentTime() << "ERROR " << buff << '\n';
+
+        char* pErrorText = 0;
+        ::FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL, ::GetLastError(), LANG_CHINESE_SIMPLIFIED, (LPSTR)&pErrorText, 0, NULL);
+        if( pErrorText )
+        {
+            _logFile << "Last Win32 error message [" << pErrorText << "]\n";
+        }
+
         _logFile << std::flush;
         freeLog();
     }

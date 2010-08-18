@@ -59,7 +59,7 @@ void CLinearGraphStatusPanel::OnPaint(HDC dc, PAINTSTRUCT& ps)
 
 void CLinearGraphStatusPanel::SetInformation(const CDataObjectPtr& pData)
 {
-    m_strFileName = pData->ownerFile;
+    m_strFileName = pData->file;
 
     if( pData->hasTimestamp() )
     {

@@ -72,12 +72,13 @@ private:
 public:
     LONG*       data;           // Sample data
     LONG        length;         // Number of points in this sample
+    LONG        amp;            // Amplification
     ULONGLONG   timeStamp;      // Actually a FILETIME struct
     DWORD       freqMulti;      // Frequency, numerator
     DWORD       freqBase;       // Frequency, denominator
-    size_t      indexInDoc;     // Index of this sample in file
-    CString     name;           // Name of the sample
-    CString     ownerFile;      // Name of the sample file
+    DWORD       index;          // Index of this sample in file
+    CString     name;           // Name of this object
+    CString     file;           // Name of the file
 
 protected:
     friend class CDataObjectPtr;
@@ -144,7 +145,7 @@ struct ISampleFile
     virtual LONG GetSampleCount() = 0;
     virtual CDataObjectPtr& GetSample(LONG i) = 0;
 
-    BOOL GetName(const CString& pathName, CString& fileName) const
+    BOOL GetObjectName(const CString& pathName, CString& fileName) const
     {
         int ipos = pathName.ReverseFind(L'\\');
         if( ipos == -1 )
@@ -159,6 +160,28 @@ struct ISampleFile
     }
 };
 
+// Read only text files
+//
+class CTextFile
+{
+public:
+    CTextFile(): m_pData(0), m_cbSize(0)
+    {
+    }
+
+    ~CTextFile(){ Close(); }
+
+    BOOL Open(PCWSTR fileName);
+    BOOL Close();
+
+    DWORD GetSize() const { return m_cbSize; }
+    PCSTR GetData() const { return m_pData; }
+
+private:
+    PCSTR       m_pData;
+    DWORD       m_cbSize;
+};
+
 class CTextSampleFile: public ISampleFile
 {
 public:
@@ -170,39 +193,58 @@ public:
     LONG GetSampleCount();
     CDataObjectPtr& GetSample(LONG i);
 
+    enum DataType
+    {
+        UnsupportedDataType = 0,
+        IntegerData,
+        FloatData
+    };
+
 protected:
     CDataObjectPtrVect      m_vSamples;
 
-protected:
-    char*  loadFile(PCWSTR fileName, DWORD& fileSize);
-    void   unloadFile(char* pFileData);
-    void   getTimeFreq(const char* pData, DWORD cbSize);
-    void   asciiTimeTrim(LONGLONG& asciit);
-    void   asciiTimeToFileTime(LONGLONG& asciit);
+private:
+    void  ReadTimeStamp(const char* gp, DWORD cbSize);
+    void  ReadInt(const char* gp, DWORD cln, DWORD ccol);
+    void  ReadFloat(const char* gp, DWORD cln, DWORD ccol);
+    void  AsciiTimeTrim(LONGLONG& asciit);
+    void  AsciiTimeToFileTime(LONGLONG& asciit);
 
-    static bool isFirstColumnTimeStamp(const char* pData);
-    static DWORD __fastcall countLine(const char* pData, DWORD cbSize);
-    static DWORD __fastcall countColumn(const char* pData, DWORD cbSize);
-    static DWORD __fastcall countWord(const char* pData, DWORD cbSize);
+    static DWORD __fastcall CheckDataType(PCSTR pData, DWORD cbSize);
+    static DWORD __fastcall CountLine(PCSTR pData, DWORD cbSize);
+    static DWORD __fastcall CountColumn(PCSTR pData, DWORD cbSize);
+    static DWORD __fastcall CountWord(PCSTR pData, DWORD cbSize);
 
-    static const char* readWord(const char*& gp)
+    static BOOL IsTimeStamp(PCSTR pData)
     {
-        while( isWhitespace(*gp) ){ ++gp; }
-        const char* word = gp;
-        while( !isWhitespace(*gp) ){ ++gp; }
-        return word;
+        // Compare with 1900010100, which is the minimum value accepted as a decimal
+        //string represented timestamp
+        //
+        return pData ? (_atoi64(pData) > 0x0713FDA74) : false;
     }
 
-    inline static int isWhitespace(char ch)
+    static BOOL IsWhitespace(char ch)
     {
         return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
     }
 
-    inline static int isLegalCharacter(char ch)
+    static BOOL IsLegalCharacter(char ch)
     {
-        return isWhitespace(ch) || (ch >= '0' && ch <= '9')
-            || ch == '+' || ch == '-' || ch == '.';
+        return IsWhitespace(ch)
+            || (ch >= '0' && ch <= '9') || ch == '+' || ch == '-';
     }
+
+    //  To be faster, this method runs without boundary check
+    //  countLine, countColumn and countWord ensure that calling of nextWord
+    // is carefully controlled and thus in no circumstance will nextWord cause
+    // access violation
+    //
+    inline static void NextWord(const char*& gp)
+    {
+        while( IsWhitespace(*gp) ) { ++gp; }
+        while( !IsWhitespace(*gp) ){ ++gp; }
+    }
+
 };
 
 class CBinSampleFile : public ISampleFile

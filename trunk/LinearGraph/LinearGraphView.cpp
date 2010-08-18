@@ -800,7 +800,14 @@ void CLinearGraphView::DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, L
                 
                 if( m_dwOptionSet & OptCoordinates )
                 {
-                    _itow(y, textBuff, 10);
+                    if( m_pData->amp == 1 )
+                    {
+                        _itow(y, textBuff, 10);
+                    }
+                    else
+                    {
+                        swprintf(textBuff, 32, L"%.3f", y/(double)m_pData->amp);
+                    }
 
                     rectText.left = apt[1].x+4;
                     rectText.right= rectText.left + 120;
@@ -909,7 +916,7 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
             {
                 t += 10000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wMinute, unitName[Minute],
                     sectDate.wSecond, unitName[Second]);
             }
@@ -918,7 +925,7 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
             {
                 t += 600000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wHour, unitName[Hour],
                     sectDate.wMinute, unitName[Second]);
             }
@@ -927,7 +934,7 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
             {
                 t += 36000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wDay, unitName[Day],
                     sectDate.wHour, unitName[Hour]);
             }
@@ -936,7 +943,7 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
             {
                 t += 864000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wMonth, unitName[Month],
                     sectDate.wDay, unitName[Day]);
             }
@@ -953,7 +960,7 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
                     sectDate.wMonth = 1;
                 }
                 ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
-                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wYear, unitName[Year],
                     sectDate.wMonth, unitName[Month]);
             }
@@ -962,7 +969,7 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
             {
                 ++sectDate.wYear;
                 ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
-                cchText = swprintf(labelBuff, 32, L"%d%c%d%c",
+                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wYear, unitName[Year],
                     sectDate.wMonth, unitName[Month]);
             }
@@ -1180,13 +1187,24 @@ int CLinearGraphView::GetPositionLabel(PWSTR labelBuff, int cchSize) const
     POINT pt = {m_nCursorX, m_nCursorY};
     ClientPtToGraphPt(pt);
 
-    int cchText = ::swprintf(labelBuff, L"[%d, %d]", pt.x, pt.y);
+    int cchText;
+    if( m_pData->amp == 1 )
+    {
+        cchText = ::swprintf(labelBuff, cchSize,
+            L"[%d, %d]", pt.x, pt.y);
+    }
+    else
+    {
+        cchText = ::swprintf(labelBuff, cchSize,
+            L"[%d, %.3f]", pt.x, pt.y/(double)m_pData->amp);
+    }
+
     if( IndexToTime(pt.x, t) )
     {
         SYSTEMTIME sysTime = {0};
         ::FileTimeToSystemTime((FILETIME*)&t, &sysTime);
 
-        cchText +=::swprintf(labelBuff+cchText, cchSize-cchText,
+        cchText += ::swprintf(labelBuff+cchText, cchSize-cchText,
             L"\n%04d/%02d/%02d %02d:%02d:%02d.%03d",
             sysTime.wYear, sysTime.wMonth, sysTime.wDay,
             sysTime.wHour, sysTime.wMinute, sysTime.wSecond, sysTime.wMilliseconds);

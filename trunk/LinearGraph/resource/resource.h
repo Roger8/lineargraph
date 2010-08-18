@@ -16,6 +16,8 @@
 #define IDS_NUMERIC_OVERFLOW            123
 #define IDS_SELECT_TARGET_FOLDER        124
 #define IDS_SOURCE_NAME                 125
+#define IDD_DIALOG1                     125
+#define IDD_DLG_SETTINGS                125
 #define IDS_FREQUENCY                   126
 #define IDS_TIMESTAMP                   127
 #define IDS_DATAPTS                     128
@@ -112,13 +114,14 @@
 #define ID_40043                        40043
 #define ID_VIEW_                        40044
 #define ID_VIEW_SHOWTIMEAXIS            40045
+#define ID_40046                        40046
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        125
-#define _APS_NEXT_COMMAND_VALUE         40046
+#define _APS_NEXT_RESOURCE_VALUE        126
+#define _APS_NEXT_COMMAND_VALUE         40047
 #define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -2,10 +2,11 @@
 
 CDataObject::CDataObject(LONG* pData, LONG len): data(pData), length(len)
 {
+    amp = 1;
     refCount  = 1;
     timeStamp = 0;
     freqBase  = freqMulti = 0;
-    indexInDoc = 0;
+    index = 0;
 }
 
 CDataObject::~CDataObject()
@@ -37,7 +38,7 @@ CDataObjectPtr::CDataObjectPtr(CDataObject* pImpl) : m_pObj(pImpl)
     if( m_pObj )
     {
         m_pObj->refCount = 1;
-        m_pObj->indexInDoc = -1;
+        m_pObj->index = -1;
         m_pObj->timeStamp = 0;
         m_pObj->freqBase = m_pObj->freqMulti = 1;
     }
@@ -77,8 +78,51 @@ void CDataObjectPtr::release()
     m_pObj = 0;
 }
 
+BOOL CTextFile::Open(PCWSTR fileName)
+{
+    if( m_pData || !fileName )
+    {
+        return FALSE;
+    }
+
+    HANDLE hFile = ::CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ, 0,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    if( hFile == INVALID_HANDLE_VALUE )
+    {
+        return FALSE;
+    }
+
+    DWORD dwSize;
+    m_cbSize = ::GetFileSize(hFile, &dwSize);
+    if( dwSize || m_cbSize > 0x40000000 )
+    {
+        ::CloseHandle(hFile);
+        ::SetLastError(ERROR_FILE_TOO_LARGE);
+        return FALSE;
+    }
+
+    char* pData = new char[m_cbSize];
+    ::ReadFile(hFile, pData, m_cbSize, &dwSize, 0);
+    if( dwSize != m_cbSize )
+    {
+        delete[] pData;
+        pData = 0;
+        m_cbSize = 0;
+    }
+    return (m_pData = pData) != 0;
+}
+
+BOOL CTextFile::Close()
+{
+    delete[] m_pData;
+    m_pData  = 0;
+    m_cbSize = 0;
+    return TRUE;
+}
+
 CTextSampleFile::CTextSampleFile()
 {
+
 }
 
 CTextSampleFile::~CTextSampleFile()
@@ -88,83 +132,83 @@ CTextSampleFile::~CTextSampleFile()
 
 BOOL CTextSampleFile::Open(PCWSTR szFileName)
 {
-    DWORD fileSize  = 0;
-    char*  pFileData = loadFile(szFileName, fileSize);
-    if( !pFileData )
+    if( m_vSamples.size() )
     {
-        LG_TRACE("CTextSampleFile::Open::loadFile Failed [pFileData = 0]");
         return FALSE;
     }
 
-    m_vSamples.clear();
-
-    DWORD nLines   = countLine(pFileData, fileSize);
-    DWORD nColumns = countColumn(pFileData, fileSize);
-    DWORD nWords   = countWord(pFileData, fileSize);
-
-    if( nLines >= 0x10000000 || nColumns >= 0x10000000 || !nLines || !nColumns )
+    CTextFile textFile;
+    if( !textFile.Open(szFileName) )
     {
-        LG_ERROR("CTextSampleFile::Open Failed [nLines = %d, nColumns = %d]",
-            nLines, nColumns);
-        unloadFile(pFileData);
+        LG_ERROR("CTextFile::Open Failed [Win32 Error = %d]", ::GetLastError());
         return FALSE;
     }
 
-    if( nWords != nLines*nColumns && nWords != nLines*(nColumns+1) )
+    DWORD dataType;
+    dataType = CheckDataType(textFile.GetData(), textFile.GetSize());
+    if( dataType == UnsupportedDataType )
     {
-        LG_ERROR("CTextSampleFile::Open Failed [data corrupted]");
-        unloadFile(pFileData);
+        LG_ERROR("CTextFile::Open Failed [Unsupported Data Type]");
         return FALSE;
     }
 
-    CDataObjectPtr pObj;
-    for(size_t i = 0; i < nColumns; ++i)
+    DWORD nLines, nColumns, nWords;
+    nLines   = CountLine(textFile.GetData(), textFile.GetSize());
+    nColumns = CountColumn(textFile.GetData(), textFile.GetSize());
+    nWords   = CountWord(textFile.GetData(), textFile.GetSize());
+    LG_TRACE("File Statistics: %d lines, %d columns, %d words",
+        nLines, nColumns, nWords);
+
+    if( nWords != nLines * nColumns )
     {
-        pObj = CDataObject::CreateObject(nLines);
-        if( !pObj )
+        LG_ERROR("CTextSampleFile::Open Failed [Corrupted Data]");
+        return FALSE;
+    }
+
+    BOOL fTimeStamp = IsTimeStamp(textFile.GetData());
+    if( fTimeStamp )
+    {
+        --nColumns;
+    }
+
+    for(DWORD i = 0; i < nColumns; ++i)
+    {
+        CDataObjectPtr pObj;
+        if( !(pObj = CDataObject::CreateObject(nLines)) )
         {
             return FALSE;
         }
 
-        pObj->indexInDoc = i;
-        pObj->ownerFile = szFileName;
-        
-        GetName(pObj->ownerFile, pObj->name);
+        m_vSamples.push_back(pObj);
+
+        pObj->index = i;
+        pObj->file  = szFileName;
+        GetObjectName(pObj->file, pObj->name);
+
         if( nColumns > 1 )
         {
             pObj->name.AppendFormat(L"[%d]", i);
         }
-        m_vSamples.push_back(pObj);
+    }
+
+    if( fTimeStamp )
+    {
+        ReadTimeStamp(textFile.GetData(), textFile.GetSize());
     }
 
     //  Convert text data to binary data
     //
-    const char* gp = pFileData;
-    if( isFirstColumnTimeStamp(pFileData) )
+    switch( dataType )
     {
-        for(size_t i = 0; i < nLines; ++i)
-        {
-            readWord(gp); // Skip time stamp
-
-            for (size_t j = 0; j < nColumns; ++j)
-            {
-                m_vSamples[j]->data[i] = atoi(readWord(gp));
-            }
-        }
-        getTimeFreq(pFileData, fileSize);
+    case IntegerData:
+        LG_TRACE("Data type: Integer");
+        ReadInt(textFile.GetData(), nLines, nColumns);
+        break;
+    case FloatData:
+        LG_TRACE("Data type: Float");
+        ReadFloat(textFile.GetData(), nLines, nColumns);
+        break;
     }
-    else
-    {
-        for(size_t i = 0; i < nLines; ++i)
-        {
-            for (size_t j = 0; j < nColumns; ++j)
-            {
-                m_vSamples[j]->data[i] = atoi(readWord(gp));
-            }
-        }
-    }
-
-    unloadFile(pFileData);
     return TRUE;
 }
 
@@ -184,7 +228,7 @@ CDataObjectPtr& CTextSampleFile::GetSample(LONG i)
     return m_vSamples[i];
 }
 
-void CTextSampleFile::getTimeFreq(const char* pData, DWORD cbSize)
+void CTextSampleFile::ReadTimeStamp(PCSTR pData, DWORD cbSize)
 {
     LONGLONG tBegin = _atoi64(pData);
     LONGLONG tEnd = tBegin;
@@ -202,15 +246,12 @@ void CTextSampleFile::getTimeFreq(const char* pData, DWORD cbSize)
         }
     }
 
-    if( !tEnd )
-    {
-        tEnd = tBegin;
-    }
+    if( !tEnd ){ tEnd = tBegin; }
 
-    asciiTimeTrim(tBegin);
-    asciiTimeTrim(tEnd);
-    asciiTimeToFileTime(tBegin);
-    asciiTimeToFileTime(tEnd);
+    AsciiTimeTrim(tBegin);
+    AsciiTimeTrim(tEnd);
+    AsciiTimeToFileTime(tBegin);
+    AsciiTimeToFileTime(tEnd);
 
     for(size_t i = 0; i < m_vSamples.size(); ++i)
     {
@@ -221,7 +262,7 @@ void CTextSampleFile::getTimeFreq(const char* pData, DWORD cbSize)
     }
 }
 
-void CTextSampleFile::asciiTimeTrim(LONGLONG& asciit)
+void CTextSampleFile::AsciiTimeTrim(LONGLONG& asciit)
 {
     // If asciit lacks precision, just append zeros
     //
@@ -242,7 +283,7 @@ void CTextSampleFile::asciiTimeTrim(LONGLONG& asciit)
     }
 }
 
-void CTextSampleFile::asciiTimeToFileTime(LONGLONG& t)
+void CTextSampleFile::AsciiTimeToFileTime(LONGLONG& t)
 {
     SYSTEMTIME syst = {0};
     syst.wYear   = (WORD)(t / 10000000000000);
@@ -256,27 +297,32 @@ void CTextSampleFile::asciiTimeToFileTime(LONGLONG& t)
     SystemTimeToFileTime(&syst, (FILETIME*)&t);
 }
 
-bool CTextSampleFile::isFirstColumnTimeStamp(const char* pData)
+DWORD __fastcall CTextSampleFile::CheckDataType(PCSTR pData, DWORD cbSize)
 {
-    // Compare with 1900010100, which is the minimum value accepted as a decimal
-    //string represented timestamp
-    //
-    return _atoi64(pData) > 0x0713FDA74;
+    BOOL bFloat = FALSE;
+    for(DWORD i = 0; i < cbSize; ++i)
+    {
+        if( '.' == pData[i] )
+        {
+            bFloat = TRUE;
+        }
+        else if( !IsLegalCharacter(pData[i]) )
+        {
+            return UnsupportedDataType;
+        }
+    }
+    return bFloat ? FloatData : IntegerData;
 }
 
-DWORD CTextSampleFile::countLine(const char* pData, DWORD cbSize)
+DWORD CTextSampleFile::CountLine(PCSTR pData, DWORD cbSize)
 {
     DWORD nLines = 0;
     for(DWORD i = 0; i < cbSize; )
     {
-        if( !isLegalCharacter(pData[i]) )
+        if( '\n' == pData[i++] )
         {
-            LG_ERROR("Illegal character encountered at position [%d]", i);
-            return -1;
-        }
-        else if( '\n' == pData[i++] )
-        {
-            while( (i<cbSize) && isWhitespace(pData[i]) )
+            // Skip blank lines
+            while( (i<cbSize) && IsWhitespace(pData[i]) )
             {
                 ++i;
             }
@@ -290,35 +336,28 @@ DWORD CTextSampleFile::countLine(const char* pData, DWORD cbSize)
     return nLines;
 }
 
-DWORD CTextSampleFile::countColumn(const char* pData, DWORD cbSize)
+DWORD CTextSampleFile::CountColumn(PCSTR pData, DWORD cbSize)
 {
     DWORD nColumns = 0;
     for(DWORD i = 0; i < cbSize; ++i)
     {
         if( '\n' == pData[i] )
         {
-            nColumns = countWord(pData, i);
+            nColumns = CountWord(pData, i);
             break;
         }
-    }
-
-    if( !nColumns ){ return nColumns; }
-
-    if( isFirstColumnTimeStamp(pData) )
-    {
-        --nColumns;
     }
     return nColumns;
 }
 
-DWORD CTextSampleFile::countWord(const char* pData, DWORD cbSize)
+DWORD CTextSampleFile::CountWord(PCSTR pData, DWORD cbSize)
 {
     DWORD wordCount = 0;
     DWORD dfaState  = 0;
 
     for(DWORD i = 0; i < cbSize; ++i)
     {
-        if( isWhitespace(pData[i]) )
+        if( IsWhitespace(pData[i]) )
         {
             dfaState = 0;
         }
@@ -332,48 +371,77 @@ DWORD CTextSampleFile::countWord(const char* pData, DWORD cbSize)
     return wordCount;
 }
 
-char* CTextSampleFile::loadFile(PCWSTR fileName, DWORD& fileSize)
+void CTextSampleFile::ReadInt(const char* gp, DWORD cLn, DWORD cCol)
 {
-    HANDLE hFile;
-    hFile = ::CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ, 0,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-    if( hFile == INVALID_HANDLE_VALUE )
+    // Extract the raw pointers for faster access
+    LONG** apData = new LONG*[cCol];
+    for(DWORD i = 0; i < cCol; ++i)
     {
-        LG_ERROR("CTextSampleFile::loadFile::CreateFile Failed. [Error = 0x%08H]",
-            ::GetLastError());
-        return 0;
+        apData[i] = m_vSamples[i]->data;
     }
-    fileSize = ::GetFileSize(hFile, 0);
 
-    char* pFileData = 0;
-    if( fileSize && (pFileData = new char[fileSize + 2]) )
+    if( IsTimeStamp(gp) )
     {
-        DWORD dwRead = 0;
-        ::ReadFile(hFile, pFileData, fileSize, &dwRead, 0);
-
-        if( dwRead != fileSize )
+        for(DWORD i = 0; i < cLn; ++i)
         {
-            delete[] pFileData;
-            pFileData = 0;
-        }
-        else
-        {
-            //
-            //  Make sure that the text is ended with a whitespace
-            //  readWord function may cause access violation if the ending character
-            // is not a whitespace
-            //
-            pFileData[fileSize] = '\n';
-            pFileData[fileSize + 1] = 0;
+            NextWord(gp); // Skip time stamp
+            for (DWORD j = 0; j < cCol; ++j)
+            {
+                apData[j][i] = atoi(gp);
+                NextWord(gp);
+            }
         }
     }
-    ::CloseHandle(hFile);
-    return pFileData;
+    else
+    {
+        for(DWORD i = 0; i < cLn; ++i)
+        {
+            for (DWORD j = 0; j < cCol; ++j)
+            {
+                apData[j][i] = atoi(gp);
+                NextWord(gp);
+            }
+        }
+    }
+
+    delete[] apData;
 }
 
-void CTextSampleFile::unloadFile(char* pFileData)
+void CTextSampleFile::ReadFloat(const char* gp, DWORD cLn, DWORD cCol)
 {
-    delete[] pFileData;
+    // Extract the raw pointers for faster access
+    LONG** apData = new LONG*[cCol];
+    for(DWORD i = 0; i < cCol; ++i)
+    {
+        m_vSamples[i]->amp = 1024;
+        apData[i] = m_vSamples[i]->data;
+    }
+
+    if( IsTimeStamp(gp) )
+    {
+        for(DWORD i = 0; i < cLn; ++i)
+        {
+            NextWord(gp); // Skip time stamp
+            for (DWORD j = 0; j < cCol; ++j)
+            {
+                apData[j][i] = (LONG)(atof(gp) * 1024 + 0.5);
+                NextWord(gp);
+            }
+        }
+    }
+    else
+    {
+        for(DWORD i = 0; i < cLn; ++i)
+        {
+            for (DWORD j = 0; j < cCol; ++j)
+            {
+                apData[j][i] = (LONG)(atof(gp) * 1024 + 0.5);
+                NextWord(gp);
+            }
+        }
+    }
+
+    delete[] apData;
 }
 
 BOOL CBinSampleFile::Open(PCWSTR szFileName)
@@ -440,9 +508,9 @@ BOOL CBinSampleFile::Open(PCWSTR szFileName)
     pData->freqBase  = hs.freqBase;
     pData->freqMulti = hs.freqMulti;
     pData->timeStamp = *(LONGLONG*)&hs.timeStamp;
-    pData->ownerFile = szFileName;
-    pData->indexInDoc = 0;
-    GetName(pData->ownerFile, pData->name);
+    pData->file = szFileName;
+    pData->index = 0;
+    GetObjectName(pData->file, pData->name);
     pData->trimFrequency();
 
     m_pData = pData;
@@ -496,8 +564,8 @@ BOOL CSeedSampleFile::Open(PCWSTR szFileName)
         ::SystemTimeToFileTime(&pcurt->datatime, (FILETIME*)&pObj->timeStamp);
         pObj->freqMulti = pcurt->dataFreq.numerator;
         pObj->freqBase = pcurt->dataFreq.denominator;
-        pObj->indexInDoc = i;
-        pObj->ownerFile = szFileName;
+        pObj->index = i;
+        pObj->file = szFileName;
         pObj->name = pcurt->station;
         pObj->name.AppendChar(L'.');
         pObj->name.Append(pcurt->channel);

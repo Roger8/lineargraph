@@ -42,7 +42,7 @@ BOOL CSourceSelectDlg::OnInitDialog()
             buf.Format(L"%d", m_vSource[i]->length);
             m_listView.SetItemText((int)i, 3, buf);
 
-            m_listView.SetItemText((int)i, 4, m_vSource[i]->ownerFile);
+            m_listView.SetItemText((int)i, 4, m_vSource[i]->file);
         }
     }
 
@@ -1383,15 +1383,15 @@ void CLinearGraphFrameWnd::OnEditReload()
     }
 
     BeginHeavyTask();
-    EnterHeavyFileTask(pdo->ownerFile);
+    EnterHeavyFileTask(pdo->file);
    
     CLinearGraphDoc doc;
-    if( doc.Open(pdo->ownerFile) )
+    if( doc.Open(pdo->file) )
     {
-        if( pdo->indexInDoc < (size_t)doc.GetSampleCount() )
+        if( pdo->index < (size_t)doc.GetSampleCount() )
         {
             CLinearGraphApp::GetApp()->EnterHeavyTaskStep(IDS_PREPARE_VIEW);
-            m_pLastActiveView->BindData(doc.GetSample(pdo->indexInDoc));
+            m_pLastActiveView->BindData(doc.GetSample(pdo->index));
         }
         else{ ShowErrorBox(IDS_ERR_DOC_CHANGED, IDS_APP_CAPTION); }
     }

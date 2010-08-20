@@ -117,7 +117,12 @@ public:
 
     enum DatePrecision
     {
-        Year = 0, Month, Day, Hour, Minute, Second
+        // Do not modify the enum value of the six basic unit
+        // They are used as index to locate Chinese unit name
+        Year = 0, Month, Day, Hour, Minute, Second,
+
+        // Derivative units
+        TriHour, Quarter, FifSeconds
     };
 
     COLORREF GetForegroundColor() const;

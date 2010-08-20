@@ -1260,8 +1260,8 @@ BOOL CLinearGraphFrameWnd::SaveDataToFile(const CDataObjectPtr pdo, CRectangle* 
 
     // These variables are copied for fast access
     //
-    DWORD freqBase = pdo->freqBase;
-    DWORD freqMulti = pdo->freqMulti;
+    DWORD freqBase = pdo->freqDeno;
+    DWORD freqMulti = pdo->freqNume;
 
     LONGLONG timeStamp = pdo->timeStamp;
     if( pClip )
@@ -1700,20 +1700,41 @@ void CLinearGraphFrameWnd::OnAnalyzePower()
 
     LONG* pData = m_pLastActiveView->GetDataObject()->data;
     LONG  len = m_pLastActiveView->GetDataObject()->length;
+    LONG  factor = m_pLastActiveView->GetDataObject()->factor;
 
     CRectangle dataRect;
     m_pLastActiveView->GetDataRectangle(dataRect);
 
-    if( dataRect.yMax >= 46340 || dataRect.yMin <= -46340 )
+    if( dataRect.yMax/factor >= 46340 || dataRect.yMin/factor <= -46340 )
     {
         ShowErrorBox(IDS_NUMERIC_OVERFLOW, IDS_ACTION_STOPPED);
         return ;
     }
 
-    BeginHeavyTask();
-    for(LONG i = 0; i < len; ++i)
+    if( factor != 1 )
     {
-        pData[i] *= pData[i];
+        WCHAR info[128];
+        GetString(IDS_POWER_FLOAT_CONFIRM, info, 128);
+        if( IDYES != MessageBox(info, MB_ICONWARNING|MB_YESNO) )
+        {
+            return ;
+        }
+    }
+
+    BeginHeavyTask();
+    if( factor == 1 )
+    {
+        for(LONG i = 0; i < len; ++i)
+        {
+            pData[i] *= pData[i];
+        }
+    }
+    else
+    {
+        for(LONG i = 0; i < len; ++i)
+        {
+            pData[i] = pData[i] * (LONGLONG)pData[i] / factor;
+        }
     }
 
     EnterHeavyTaskStep(IDS_PREPARE_VIEW);

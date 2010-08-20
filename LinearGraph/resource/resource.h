@@ -16,7 +16,6 @@
 #define IDS_NUMERIC_OVERFLOW            123
 #define IDS_SELECT_TARGET_FOLDER        124
 #define IDS_SOURCE_NAME                 125
-#define IDD_DIALOG1                     125
 #define IDD_DLG_SETTINGS                125
 #define IDS_FREQUENCY                   126
 #define IDS_TIMESTAMP                   127
@@ -54,6 +53,8 @@
 #define IDS_ERR_OUT_OF_MEMORY           159
 #define IDS_ERR_GMEM_OVER               160
 #define IDS_DATETIMEUNIT                161
+#define IDS_ERR_ACTION_ON_FLOAT         162
+#define IDS_POWER_FLOAT_CONFIRM         162
 #define IDC_BTN_OK                      1002
 #define IDC_EDIT_INFO                   1020
 #define IDC_BTN_CANCEL                  1022

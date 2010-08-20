@@ -708,12 +708,12 @@ CLinearGraphView::DatePrecision CLinearGraphView::CalcTimeAxisPrecision(
         {
             // timespan less than 25 hours, split by hour
             datePrecision = Hour;
-            if( dt > 3 ){ datePrecision = TriHour; }
+            if( dt > 6 ){ datePrecision = TriHour; }
         }
     }
     else if( stEnd.wHour != stBegin.wHour )
     {
-        datePrecision = (stEnd.wHour-stBegin.wHour > 3) ? TriHour : Hour;
+        datePrecision = (stEnd.wHour-stBegin.wHour > 6) ? TriHour : Hour;
         dt = stEnd.wMinute-stBegin.wMinute + (stEnd.wHour-stBegin.wHour)*60;
         if( dt < 61 )
         {

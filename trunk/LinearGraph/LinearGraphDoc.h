@@ -70,12 +70,12 @@ private:
     ~CDataObject();
 
 public:
-    LONG*       data;           // Sample data
+    LONG*       data;           // Sample data, may be amplified
     LONG        length;         // Number of points in this sample
-    LONG        amp;            // Amplification
+    LONG        factor;         // Constant factor used to amplify the data
     ULONGLONG   timeStamp;      // Actually a FILETIME struct
-    DWORD       freqMulti;      // Frequency, numerator
-    DWORD       freqBase;       // Frequency, denominator
+    DWORD       freqNume;       // Frequency, numerator
+    DWORD       freqDeno;       // Frequency, denominator
     DWORD       index;          // Index of this sample in file
     CString     name;           // Name of this object
     CString     file;           // Name of the file
@@ -89,12 +89,12 @@ public:
 
     BOOL hasTimestamp() const
     {
-        return timeStamp && freqBase && freqMulti;
+        return timeStamp && freqDeno && freqNume;
     }
 
     DOUBLE getFrequency() const
     {
-        return (DOUBLE)freqMulti / freqBase;
+        return (DOUBLE)freqNume / freqDeno;
     }
 
     BOOL getDateTime(SYSTEMTIME& st) const
@@ -104,24 +104,24 @@ public:
 
     ULONGLONG getTimeSpan() const
     {
-        return length * (ULONGLONG)freqBase / freqMulti;
+        return length * (ULONGLONG)freqDeno / freqNume;
     }
 
     BOOL isCompatibleWith(const CDataObjectPtr& r) const
     {
         return length == r->length && timeStamp == r->timeStamp
-            && freqMulti == r->freqMulti && freqBase == r->freqBase;
+            && freqNume == r->freqNume && freqDeno == r->freqDeno;
     }
 
     void trimFrequency()
     {
-        if( !freqBase || !freqMulti )
+        if( !freqDeno || !freqNume )
         {
             return ;
         }
 
-        DWORD a = max(freqMulti, freqBase);
-        DWORD b = min(freqMulti, freqBase);
+        DWORD a = max(freqNume, freqDeno);
+        DWORD b = min(freqNume, freqDeno);
 
         for(DWORD rem = a%b; rem; rem = a%b)
         {
@@ -129,8 +129,8 @@ public:
             b = rem;
         }
 
-        freqMulti /= b;
-        freqBase /= b;
+        freqNume /= b;
+        freqDeno /= b;
     }
 };
 
@@ -302,10 +302,10 @@ public:
     }
 
 private:
-    ISampleFile* openTextFile(PCWSTR szFileName);
-    ISampleFile* openSeedFile(PCWSTR szFileName);
-    ISampleFile* openEdasFile(PCWSTR szFileName);
-    ISampleFile* openBinFile(PCWSTR szFileName);
+    ISampleFile* OpenTextFile(PCWSTR szFileName);
+    ISampleFile* OpenSeedFile(PCWSTR szFileName);
+    ISampleFile* OpenEdasFile(PCWSTR szFileName);
+    ISampleFile* OpenBinFile(PCWSTR szFileName);
 
 private:
     ISampleFile*    m_pFile;

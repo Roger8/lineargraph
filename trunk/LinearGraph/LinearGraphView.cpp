@@ -233,8 +233,8 @@ BOOL CLinearGraphView::GetDateTime(SYSTEMTIME& stDate, DWORD& fbase, DWORD& fmul
         return FALSE;
     }
 
-    fbase  = m_pData->freqBase;
-    fmulti = m_pData->freqMulti;
+    fbase  = m_pData->freqDeno;
+    fmulti = m_pData->freqNume;
     ::FileTimeToSystemTime((FILETIME*)&(m_pData->timeStamp), &stDate);
     return TRUE;
 }
@@ -252,8 +252,8 @@ BOOL CLinearGraphView::SetDateTime(SYSTEMTIME& stDateTime, DWORD fbase, DWORD fm
 BOOL CLinearGraphView::SetDateTime(FILETIME& ftDateTime, DWORD fbase, DWORD fmulti)
 {
     m_pData->timeStamp = *((ULONGLONG*)&ftDateTime);
-    m_pData->freqBase  = fbase;
-    m_pData->freqMulti = fmulti;
+    m_pData->freqDeno  = fbase;
+    m_pData->freqNume = fmulti;
     return TRUE;
 }
 
@@ -680,6 +680,8 @@ CLinearGraphView::DatePrecision CLinearGraphView::CalcTimeAxisPrecision(
     SYSTEMTIME& stBegin, SYSTEMTIME& stEnd )
 {
     DatePrecision datePrecision = Second;
+
+    DWORD dt;
     if( stEnd.wYear != stBegin.wYear )
     {
         datePrecision = Year;
@@ -692,7 +694,7 @@ CLinearGraphView::DatePrecision CLinearGraphView::CalcTimeAxisPrecision(
     else if( stEnd.wMonth != stBegin.wMonth )
     {
         datePrecision = Month;
-        if( stEnd.wDay-stBegin.wDay + (stEnd.wMonth-stBegin.wMonth)*30 < 30 )
+        if( stEnd.wDay-stBegin.wDay + (stEnd.wMonth-stBegin.wMonth)*30 < 31 )
         {
             // timespan less than month days, split by day
             datePrecision = Day;
@@ -701,31 +703,40 @@ CLinearGraphView::DatePrecision CLinearGraphView::CalcTimeAxisPrecision(
     else if( stEnd.wDay != stBegin.wDay )
     {
         datePrecision = Day;
-        if( stEnd.wHour-stBegin.wHour + (stEnd.wDay-stBegin.wDay)*24 < 25 )
+        dt = stEnd.wHour-stBegin.wHour + (stEnd.wDay-stBegin.wDay)*24;
+        if( dt < 25 )
         {
             // timespan less than 25 hours, split by hour
             datePrecision = Hour;
+            if( dt > 3 ){ datePrecision = TriHour; }
         }
     }
     else if( stEnd.wHour != stBegin.wHour )
     {
-        datePrecision = Hour;
-        if( stEnd.wMinute-stBegin.wMinute+ (stEnd.wHour-stBegin.wHour)*60 < 61 )
+        datePrecision = (stEnd.wHour-stBegin.wHour > 3) ? TriHour : Hour;
+        dt = stEnd.wMinute-stBegin.wMinute + (stEnd.wHour-stBegin.wHour)*60;
+        if( dt < 61 )
         {
             // timespan less than 61 minutes, split by minute
             datePrecision = Minute;
+            if( dt > 15 ){ datePrecision = Quarter; }
         }
     }
     else if( stEnd.wMinute != stBegin.wMinute )
     {
-        datePrecision = Minute;
-        if( stEnd.wSecond-stBegin.wSecond + (stEnd.wMinute-stBegin.wMinute)*60 < 61 )
+        datePrecision = (stEnd.wMinute-stBegin.wMinute > 15) ? Quarter : Minute;
+        dt = stEnd.wSecond-stBegin.wSecond + (stEnd.wMinute-stBegin.wMinute)*60;
+        if( dt < 61 )
         {
             // timespan less than 61 seconds, split by second
             datePrecision = Second;
+            if( dt > 15 ){ datePrecision = FifSeconds; }
         }
     }
-
+    else if( stEnd.wSecond - stBegin.wSecond > 15 )
+    {
+        datePrecision = FifSeconds;
+    }
     return datePrecision;
 }
 
@@ -751,10 +762,10 @@ void CLinearGraphView::DrawRuler(HDC dc, CRectangle& rcCanvas, CRectangle& rcCli
         LONGLONG t64;
         SYSTEMTIME stBegin, stEnd;
         t64 = m_pData->timeStamp
-            + rcClip.xMin*(LONGLONG)10000000*m_pData->freqBase/m_pData->freqMulti;
+            + rcClip.xMin*(LONGLONG)10000000*m_pData->freqDeno/m_pData->freqNume;
         ::FileTimeToSystemTime((FILETIME*)&t64, &stBegin);
         t64 = m_pData->timeStamp
-            + rcClip.xMax*(LONGLONG)10000000*m_pData->freqBase/m_pData->freqMulti;
+            + rcClip.xMax*(LONGLONG)10000000*m_pData->freqDeno/m_pData->freqNume;
         ::FileTimeToSystemTime((FILETIME*)&t64, &stEnd);
 
         DrawTimeAxis(dc, ptStart, stBegin, stEnd);
@@ -771,7 +782,8 @@ void CLinearGraphView::DrawRuler(HDC dc, CRectangle& rcCanvas, CRectangle& rcCli
     ::SelectObject(dc, hOldPen);
 }
 
-void CLinearGraphView::DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit)
+void CLinearGraphView::DrawVerticalAxis(
+    HDC dc, POINT ptStart, LONG nSections, LONG nUnit)
 {
     POINT apt[2] = {ptStart, {ptStart.x, ptStart.y+nUnit*nSections}};
     GraphPtToClientPt(apt[0]);
@@ -800,13 +812,13 @@ void CLinearGraphView::DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, L
                 
                 if( m_dwOptionSet & OptCoordinates )
                 {
-                    if( m_pData->amp == 1 )
+                    if( m_pData->factor == 1 )
                     {
                         _itow(y, textBuff, 10);
                     }
                     else
                     {
-                        swprintf(textBuff, 32, L"%.3f", y/(double)m_pData->amp);
+                        swprintf(textBuff, 32, L"%.3f", y/(double)m_pData->factor);
                     }
 
                     rectText.left = apt[1].x+4;
@@ -822,7 +834,8 @@ void CLinearGraphView::DrawVerticalAxis(HDC dc, POINT ptStart, LONG nSections, L
     }
 }
 
-void CLinearGraphView::DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections, LONG nUnit)
+void CLinearGraphView::DrawHorizontalAxis(
+    HDC dc, POINT ptStart, LONG nSections, LONG nUnit)
 {
     POINT apt[2] = {ptStart, {ptStart.x+nUnit*nSections, ptStart.y}};
     GraphPtToClientPt(apt[0]);
@@ -866,7 +879,8 @@ void CLinearGraphView::DrawHorizontalAxis(HDC dc, POINT ptStart, LONG nSections,
     }
 }
 
-void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, SYSTEMTIME& stEnd)
+void CLinearGraphView::DrawTimeAxis(
+    HDC dc, POINT ptStart, SYSTEMTIME& stBegin, SYSTEMTIME& stEnd)
 {
     CRectangle rcClip;
     GetClipRectangle(rcClip);
@@ -887,10 +901,13 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
     case Second:
         sectDate.wSecond = stBegin.wSecond;
     case Minute:
+    case FifSeconds:
         sectDate.wMinute = stBegin.wMinute;
     case Hour:
+    case Quarter:
         sectDate.wHour = stBegin.wHour;
     case Day:
+    case TriHour:
         sectDate.wDay = stBegin.wDay;
     case Month:
         sectDate.wMonth = stBegin.wMonth;
@@ -913,8 +930,9 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
         switch( datePrecision )
         {
         case Second:
+        case FifSeconds:
             {
-                t += 10000000;
+                t += (datePrecision == Second) ? 10000000 : 150000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
                 cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wMinute, unitName[Minute],
@@ -922,17 +940,19 @@ void CLinearGraphView::DrawTimeAxis(HDC dc, POINT ptStart, SYSTEMTIME& stBegin, 
             }
             break;
         case Minute:
+        case Quarter:
             {
-                t += 600000000;
+                t += (datePrecision == Minute) ? 600000000 : 9000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
                 cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wHour, unitName[Hour],
-                    sectDate.wMinute, unitName[Second]);
+                    sectDate.wMinute, unitName[Minute]);
             }
             break;
         case Hour:
+        case TriHour:
             {
-                t += 36000000000;
+                t += (datePrecision == Hour) ? 36000000000 : 108000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
                 cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
                     sectDate.wDay, unitName[Day],
@@ -1096,7 +1116,7 @@ void CLinearGraphView::DrawLegend(HDC dc, RECT& rcLegend, COLORREF clr, PCWSTR s
     pt[1].x = rcText.left - 20;
     pt[1].y = pt[0].y;
 
-    HPEN hPen    = ::CreatePen(PS_SOLID, 1, 0);
+    HPEN hPen    = ::CreatePen(PS_SOLID, 1, m_clrForeground);
     HPEN hOldPen = (HPEN)::SelectObject(dc, hPen);
     ::Polyline(dc, pt, 2);
     ::DeleteObject(::SelectObject(dc, hOldPen));
@@ -1174,7 +1194,7 @@ BOOL CLinearGraphView::Refresh()
     return UpdateGraphicsCache() && InvalidateRect();
 }
 
-int CLinearGraphView::GetPositionLabel(PWSTR labelBuff, int cchSize) const
+int  CLinearGraphView::GetPositionLabel(PWSTR labelBuff, int cchSize) const
 {
     // Do not draw label if the cursor has left the client area
     //
@@ -1188,7 +1208,7 @@ int CLinearGraphView::GetPositionLabel(PWSTR labelBuff, int cchSize) const
     ClientPtToGraphPt(pt);
 
     int cchText;
-    if( m_pData->amp == 1 )
+    if( m_pData->factor == 1 )
     {
         cchText = ::swprintf(labelBuff, cchSize,
             L"[%d, %d]", pt.x, pt.y);
@@ -1196,7 +1216,7 @@ int CLinearGraphView::GetPositionLabel(PWSTR labelBuff, int cchSize) const
     else
     {
         cchText = ::swprintf(labelBuff, cchSize,
-            L"[%d, %.3f]", pt.x, pt.y/(double)m_pData->amp);
+            L"[%d, %.3f]", pt.x, pt.y/(double)m_pData->factor);
     }
 
     if( IndexToTime(pt.x, t) )
@@ -1307,7 +1327,8 @@ BOOL CLinearGraphView::GetCanvasRectangle(CRectangle& rcCanvas) const
     return TRUE;
 }
 
-void CLinearGraphView::CalcLegendLabelRect(CRectangle& rcCanvas, size_t i, RECT& rcLegend) const
+void CLinearGraphView::CalcLegendLabelRect(
+    CRectangle& rcCanvas, size_t i, RECT& rcLegend) const
 {
     // font height is negative
     //
@@ -1381,8 +1402,8 @@ BOOL CLinearGraphView::ClientPtToGraphPt(POINT& pt) const
     int canvasWidth = rcCanvas.Width();
     int canvasHeight = rcCanvas.Height();
 
-    pt.x = (int)(rcClip.xMin + (__int64)(pt.x - rcCanvas.xMin) * clipWidth / canvasWidth);
-    pt.y = (int)(rcClip.yMin - (__int64)(pt.y - rcCanvas.yMax) * clipHeight / canvasHeight);
+    pt.x = rcClip.xMin + (__int64)(pt.x - rcCanvas.xMin) * clipWidth / canvasWidth;
+    pt.y = rcClip.yMin - (__int64)(pt.y - rcCanvas.yMax) * clipHeight / canvasHeight;
     return TRUE;
 }
 
@@ -1392,7 +1413,8 @@ BOOL CLinearGraphView::IndexToTime(LONG x, LONGLONG& t) const
     {
         return FALSE;
     }
-    t = m_pData->timeStamp + (LONGLONG)x * 10000000 * m_pData->freqBase / m_pData->freqMulti;
+    t = m_pData->timeStamp
+        + (LONGLONG)x * 10000000 * m_pData->freqDeno / m_pData->freqNume;
     return TRUE;
 }
 
@@ -1402,7 +1424,7 @@ BOOL CLinearGraphView::TimeToIndex(LONGLONG t, LONG& x) const
     {
         return FALSE;
     }
-    x = (t - m_pData->timeStamp) * m_pData->freqMulti / 10000000 / m_pData->freqBase;
+    x = (t - m_pData->timeStamp) * m_pData->freqNume/10000000/m_pData->freqDeno;
     return TRUE;
 }
 
@@ -1421,8 +1443,8 @@ BOOL CLinearGraphView::GraphPtToClientPt(POINT& pt) const
     LONG viewWidth = rcCanvas.Width();
     LONG viewHeight = rcCanvas.Height();
 
-    pt.x = (LONG)(rcCanvas.xMin + (__int64)(pt.x - rcClip.xMin) * viewWidth / clipWidth);
-    pt.y = (LONG)(rcCanvas.yMax - (__int64)(pt.y - rcClip.yMin) * viewHeight / clipHeight);
+    pt.x = rcCanvas.xMin + (__int64)(pt.x - rcClip.xMin)*viewWidth / clipWidth;
+    pt.y = rcCanvas.yMax - (__int64)(pt.y - rcClip.yMin)*viewHeight/ clipHeight;
     return TRUE;
 }
 

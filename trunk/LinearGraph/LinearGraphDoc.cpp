@@ -2,10 +2,10 @@
 
 CDataObject::CDataObject(LONG* pData, LONG len): data(pData), length(len)
 {
-    amp = 1;
+    factor = 1;
     refCount  = 1;
     timeStamp = 0;
-    freqBase  = freqMulti = 0;
+    freqDeno  = freqNume = 0;
     index = 0;
 }
 
@@ -40,7 +40,7 @@ CDataObjectPtr::CDataObjectPtr(CDataObject* pImpl) : m_pObj(pImpl)
         m_pObj->refCount = 1;
         m_pObj->index = -1;
         m_pObj->timeStamp = 0;
-        m_pObj->freqBase = m_pObj->freqMulti = 1;
+        m_pObj->freqDeno = m_pObj->freqNume = 1;
     }
 }
 
@@ -256,8 +256,8 @@ void CTextSampleFile::ReadTimeStamp(PCSTR pData, DWORD cbSize)
     for(size_t i = 0; i < m_vSamples.size(); ++i)
     {
         m_vSamples[i]->timeStamp = tBegin;
-        m_vSamples[i]->freqBase  = (DWORD)((tEnd - tBegin) / 10000);
-        m_vSamples[i]->freqMulti = (DWORD)fmulti * 1000;
+        m_vSamples[i]->freqDeno  = (DWORD)((tEnd - tBegin) / 10000);
+        m_vSamples[i]->freqNume = (DWORD)fmulti * 1000;
         m_vSamples[i]->trimFrequency();
     }
 }
@@ -413,10 +413,11 @@ void CTextSampleFile::ReadFloat(const char* gp, DWORD cLn, DWORD cCol)
     LONG** apData = new LONG*[cCol];
     for(DWORD i = 0; i < cCol; ++i)
     {
-        m_vSamples[i]->amp = 1024;
+        m_vSamples[i]->factor = 1000;
         apData[i] = m_vSamples[i]->data;
     }
 
+    char* p;
     if( IsTimeStamp(gp) )
     {
         for(DWORD i = 0; i < cLn; ++i)
@@ -424,8 +425,8 @@ void CTextSampleFile::ReadFloat(const char* gp, DWORD cLn, DWORD cCol)
             NextWord(gp); // Skip time stamp
             for (DWORD j = 0; j < cCol; ++j)
             {
-                apData[j][i] = (LONG)(atof(gp) * 1024 + 0.5);
-                NextWord(gp);
+                apData[j][i] = (LONG)(strtod(gp, &p) * 1000 + 0.5);
+                gp = p;
             }
         }
     }
@@ -435,8 +436,8 @@ void CTextSampleFile::ReadFloat(const char* gp, DWORD cLn, DWORD cCol)
         {
             for (DWORD j = 0; j < cCol; ++j)
             {
-                apData[j][i] = (LONG)(atof(gp) * 1024 + 0.5);
-                NextWord(gp);
+                apData[j][i] = (LONG)(strtod(gp, &p) * 1000 + 0.5);
+                gp = p;
             }
         }
     }
@@ -484,29 +485,32 @@ BOOL CBinSampleFile::Open(PCWSTR szFileName)
     case 'i':
     case 'I':
         {
+            LG_TRACE("Data type: Integer");
             ::ReadFile(hFile, pData->data, cbDataLength, &dwBytes, 0);
         }
         break;
     case 'f':
     case 'F':
         {
+            LG_TRACE("Data type: Float");
+
             BYTE* pBin = new BYTE[cbDataLength];
             ::ReadFile(hFile, pBin, cbDataLength, &dwBytes, 0);
 
             DOUBLE* fd = (DOUBLE*)pBin;
             for(DWORD i = 0; i < nLength; ++i, ++fd)
             {
-                pData->data[i] = (LONG)(*fd+0.5);
+                pData->data[i] = (LONG)((*fd)*1000+0.5);
             }
-
+            pData->factor = 1000;
             delete[] pBin;
         }
         break;
     }
     ::CloseHandle(hFile);
 
-    pData->freqBase  = hs.freqBase;
-    pData->freqMulti = hs.freqMulti;
+    pData->freqDeno  = hs.freqBase;
+    pData->freqNume = hs.freqMulti;
     pData->timeStamp = *(LONGLONG*)&hs.timeStamp;
     pData->file = szFileName;
     pData->index = 0;
@@ -562,8 +566,8 @@ BOOL CSeedSampleFile::Open(PCWSTR szFileName)
         memcpy(pObj->data, pcurt->pData, pcurt->iDataCnt * sizeof(int));
 
         ::SystemTimeToFileTime(&pcurt->datatime, (FILETIME*)&pObj->timeStamp);
-        pObj->freqMulti = pcurt->dataFreq.numerator;
-        pObj->freqBase = pcurt->dataFreq.denominator;
+        pObj->freqNume = pcurt->dataFreq.numerator;
+        pObj->freqDeno = pcurt->dataFreq.denominator;
         pObj->index = i;
         pObj->file = szFileName;
         pObj->name = pcurt->station;
@@ -612,21 +616,21 @@ BOOL CLinearGraphDoc::Open(PCWSTR szFileName)
     size_t len = wcslen(szFileName);
     if( len >= 4 && !_wcsnicmp(szFileName+len-4, L".TXT", 4) )
     {
-        m_pFile = openTextFile(szFileName);
+        m_pFile = OpenTextFile(szFileName);
     }
     else if( (len >= 5 && !_wcsnicmp(szFileName+len-5, L".SEED", 5))
         || (len >= 6 && !_wcsnicmp(szFileName+len-6, L".MSEED", 6)) )
     {
-        m_pFile = openSeedFile(szFileName);
+        m_pFile = OpenSeedFile(szFileName);
     }
     else if( len >= 5 && !_wcsnicmp(szFileName+len-5, L".EDAS", 5) )
     {
-        m_pFile = openEdasFile(szFileName);
+        m_pFile = OpenEdasFile(szFileName);
     }
     else if( (len >= 4 && !_wcsnicmp(szFileName+len-4, L".BIN", 4))
         || (len >= 5 && !_wcsnicmp(szFileName+len-5, L".BINX", 5)) )
     {
-        m_pFile = openBinFile(szFileName);
+        m_pFile = OpenBinFile(szFileName);
     }
     else
     {
@@ -646,7 +650,7 @@ BOOL CLinearGraphDoc::Close()
     return TRUE;
 }
 
-ISampleFile* CLinearGraphDoc::openTextFile( PCWSTR szFileName )
+ISampleFile* CLinearGraphDoc::OpenTextFile( PCWSTR szFileName )
 {
     LG_TRACE("Open %ws as TEXT file", szFileName);
     if( CTextSampleFile* pFile = new CTextSampleFile )
@@ -660,7 +664,7 @@ ISampleFile* CLinearGraphDoc::openTextFile( PCWSTR szFileName )
     return 0;
 }
 
-ISampleFile* CLinearGraphDoc::openSeedFile( PCWSTR szFileName )
+ISampleFile* CLinearGraphDoc::OpenSeedFile( PCWSTR szFileName )
 {
     LG_TRACE("Open %ws as SEED file", szFileName);
     if( CSeedSampleFile * pSeed = new CSeedSampleFile )
@@ -674,14 +678,14 @@ ISampleFile* CLinearGraphDoc::openSeedFile( PCWSTR szFileName )
     return 0;
 }
 
-ISampleFile* CLinearGraphDoc::openEdasFile( PCWSTR szFileName )
+ISampleFile* CLinearGraphDoc::OpenEdasFile( PCWSTR szFileName )
 {
     LG_TRACE("Open %ws as EDAS file", szFileName);
     LG_ERROR("EDAS document is not supported");
     return 0;
 }
 
-ISampleFile* CLinearGraphDoc::openBinFile( PCWSTR szFileName )
+ISampleFile* CLinearGraphDoc::OpenBinFile( PCWSTR szFileName )
 {
     LG_TRACE("Open %ws as BIN file", szFileName);
     if( CBinSampleFile* pFile = new CBinSampleFile )

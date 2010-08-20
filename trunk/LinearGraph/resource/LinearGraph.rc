@@ -308,6 +308,7 @@ STRINGTABLE
 BEGIN
     IDS_ERR_GMEM_OVER       "系统图形内存耗尽, 请关闭一些不需要使用的窗口后再尝试当前操作"
     IDS_DATETIMEUNIT        "年月日时分秒"
+    IDS_POWER_FLOAT_CONFIRM "对浮点数据进行数值平方操作可能导致数值溢出, 是否一定要进行?"
 END
 
 #endif    // Chinese (P.R.C.) resources

@@ -39,3 +39,13 @@ namespace LinearGraph
 #endif
 
 #define LG_TRACE_FUNCTION()      LG_TRACE(__FUNCTION__)
+
+#define LG_TRACE_PERFORMANCE( stmt )\
+{\
+    ULONGLONG liStart, liEnd;\
+    ::QueryPerformanceCounter((LARGE_INTEGER*)&liStart);\
+        stmt;\
+    ::QueryPerformanceCounter((LARGE_INTEGER*)&liEnd);\
+    LG_TRACE("[Performance Counter = %I64d] %s", liEnd-liStart, #stmt);\
+    LG_FLUSH_LOG();\
+}

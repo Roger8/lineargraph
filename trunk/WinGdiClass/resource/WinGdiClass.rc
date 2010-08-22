@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (P.R.C.) resources
+// Chinese (Simplified, PRC) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -46,18 +44,16 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Chinese (P.R.C.) resources
+#endif    // Chinese (Simplified, PRC) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -65,8 +61,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,10,7,26
- PRODUCTVERSION 1,10,7,26
+ FILEVERSION 1,10,8,22
+ PRODUCTVERSION 1,10,8,22
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -84,12 +80,12 @@ BEGIN
             VALUE "Comments", "Graduation Project of Xu Rui"
             VALUE "CompanyName", "School of Physics, HUST, China"
             VALUE "FileDescription", "WinGdiClass Dynamic Link Library"
-            VALUE "FileVersion", "1.10.7.26"
+            VALUE "FileVersion", "1.10.8.22"
             VALUE "InternalName", "WinGdiClass"
             VALUE "LegalCopyright", "An X.R. Program Work (c) 2010, All rights reserved."
             VALUE "OriginalFilename", "WinGdiClass.dll"
             VALUE "ProductName", "Windows GDI Class Library"
-            VALUE "ProductVersion", "1.10.7.26"
+            VALUE "ProductVersion", "1.10.8.22"
         END
     END
     BLOCK "VarFileInfo"
@@ -98,7 +94,7 @@ BEGIN
     END
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

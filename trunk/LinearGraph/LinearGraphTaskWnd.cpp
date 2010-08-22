@@ -127,9 +127,6 @@ void CLinearGraphTaskMonitorWnd::OnShowWindow( BOOL bShow )
     
     if( bShow )
     {
-        WCHAR buff[128];
-        GetString(IDS_APPLICATIOIN_BUSY, buff, 128);
-        m_statusText = buff;
         SetForegroundWindow();
     }
 }

@@ -1,5 +1,7 @@
 #pragma once
 #include <atlstr.h>
+#include <map>
+#include <string>
 
 class CWindow;
 

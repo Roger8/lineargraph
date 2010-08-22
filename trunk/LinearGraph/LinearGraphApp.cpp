@@ -184,6 +184,10 @@ void CLinearGraphApp::BeginHeavyTask()
         //m_pMainWnd->Enable(FALSE);
         //::AttachThreadInput(::GetCurrentThreadId(), m_dwMonitorID, TRUE);
     }
+
+    WCHAR buff[128];
+    GetString(IDS_APPLICATION_BUSY, buff, 128);
+    m_taskWnd.SetStatusText(buff);
     m_taskWnd.DelayShow();
 }
 
@@ -229,4 +233,11 @@ HBRUSH CLinearGraphApp::GetThemeBrush()
 HBRUSH CLinearGraphApp::GetThemeToolWindowBrush()
 {
     return (HBRUSH)m_themeToolWndBrush;
+}
+
+CString CLinearGraphApp::GetLogDirectory()
+{
+    CString temp = CApplication::GetAppDirectory();
+    temp.Append(L"log\\\0", 4);
+    return temp;
 }

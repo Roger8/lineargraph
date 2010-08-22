@@ -1,4 +1,5 @@
 #include "LinearGraph.h"
+#include "LinearGraphApp.h"
 #include "LinearGraphLog.h"
 #include <fstream>
 #include <stdarg.h>
@@ -40,8 +41,8 @@ bool LinearGraph::OpenLog()
     SYSTEMTIME sysTime;
     ::GetLocalTime(&sysTime);
 
-    CString logPath = CApplication::GetAppDirectory();
-    logPath.Append(L"log");
+    CString logPath = CLinearGraphApp::GetLogDirectory();
+    //logPath.Append(L"log");
     if( !::CreateDirectoryW(logPath, 0) && ERROR_ALREADY_EXISTS != ::GetLastError() )
     {
         return false;

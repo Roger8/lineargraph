@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (P.R.C.) resources
+// Chinese (Simplified, PRC) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
-#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -119,15 +117,6 @@ BEGIN
     CONTROL         "覆盖文件时提醒我",IDC_CHK_REMINDONWRITE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,59,86,13
 END
 
-IDD_DLG_SETTINGS DIALOGEX 0, 0, 316, 183
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "设置"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,205,162,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,259,162,50,14
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -135,7 +124,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_DLG_LINEAR, DIALOG
     BEGIN
@@ -158,14 +147,6 @@ BEGIN
         RIGHTMARGIN, 304
         BOTTOMMARGIN, 72
     END
-
-    IDD_DLG_SETTINGS, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 309
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 176
-    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -175,7 +156,7 @@ END
 // Menu
 //
 
-IDR_MENU_MAIN MENU 
+IDR_MENU_MAIN MENU
 BEGIN
     POPUP "文件(&F)"
     BEGIN
@@ -217,7 +198,12 @@ BEGIN
         MENUITEM "坐标刻度",                        ID_VIEW_COORD
         MENUITEM "图例",                          ID_VIEW_LEGEND
         MENUITEM "位置标签\tCtrl+L",                ID_VIEW_POSLABEL
-        MENUITEM "横轴显示时间刻度",                    ID_VIEW_SHOWTIMEAXIS
+        POPUP "横轴刻度"
+        BEGIN
+            MENUITEM "中文时间",            ID_VIEW_HAXIS_CHINESETIME
+            MENUITEM "标准时间",            ID_VIEW_HAXIS_STDTIME
+            MENUITEM "数值索引",            ID_VIEW_HAXIS_INDEX
+        END
         MENUITEM SEPARATOR
         MENUITEM "清除比较曲线\tF12",                 ID_VIEW_CLEARCMP
         MENUITEM "全景视图\tF11",                   ID_VIEW_RESTORE
@@ -234,11 +220,12 @@ BEGIN
         MENUITEM "平方",                          ID_ANALYZE_POWER
         MENUITEM "微分",                          ID_ANALYZE_DIFF
     END
-    POPUP "选项(&O)"
+    POPUP "工具(&T)"
     BEGIN
-        MENUITEM "显示透明的选择区域",                   ID_OPT_TRANSLUCENTSEL
-        MENUITEM "启用选区放大功能",                    ID_OPT_SELECTTRANSFORM
+        MENUITEM "显示透明的选择区域",                   ID_TOOL_TRANSLUCENTSEL
+        MENUITEM "启用选区放大功能",                    ID_TOOL_SELECTTRANSFORM
         MENUITEM SEPARATOR
+        MENUITEM "打开日志存储文件夹",                   ID_TOOL_OPENLOGDIR
     END
     POPUP "帮助(&H)"
     BEGIN
@@ -253,7 +240,7 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ACTION_STOPPED      "操作被阻止"
     IDS_INVALID_ARGS        "无效参数"
@@ -264,7 +251,7 @@ BEGIN
     IDS_TIMESTAMP           "时间戳"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_DATAPTS             "数据点数"
     IDS_SOURCE_PATH         "数据源路径"
@@ -284,14 +271,14 @@ BEGIN
     IDS_IMGFMT_TIFF         "标签图像文件格式(.tiff)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_SAVE_IMAGE          "保存图像"
     IDS_SAVE_DATA           "保存数据"
     IDS_DATAFMT_BIN         "二进制格式(.binx)"
     IDS_DATAFMT_TEXT        "文本格式-纯数据(.txt)"
     IDS_DATAFMT_TEXT_WITHTIME "文本格式-带时间戳的数据(.txt)"
-    IDS_APPLICATIOIN_BUSY   "该操作可能需要较长时间, 程序正在处理, 请稍候..."
+    IDS_APPLICATION_BUSY    "该操作可能需要较长时间, 程序正在处理, 请稍候..."
     IDS_OPEN_DOCUMENT       "正在打开文件: "
     IDS_PREPARE_VIEW        "正在准备数据视图..."
     IDS_TASKMONITOR_CAPTION "LinearGraph Task Monitor"
@@ -304,25 +291,23 @@ BEGIN
     IDS_ERR_OUT_OF_MEMORY   "系统内存不足"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ERR_GMEM_OVER       "系统图形内存耗尽, 请关闭一些不需要使用的窗口后再尝试当前操作"
     IDS_DATETIMEUNIT        "年月日时分秒"
     IDS_POWER_FLOAT_CONFIRM "对浮点数据进行数值平方操作可能导致数值溢出, 是否一定要进行?"
 END
 
-#endif    // Chinese (P.R.C.) resources
+#endif    // Chinese (Simplified, PRC) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -378,7 +363,7 @@ END
 // Accelerator
 //
 
-IDR_ACCELERATOR ACCELERATORS 
+IDR_ACCELERATOR ACCELERATORS
 BEGIN
     "K",            ID_ANALYZE_COMPARE,     VIRTKEY, CONTROL, NOINVERT
     "J",            ID_ANALYZE_SYNC,        VIRTKEY, CONTROL, NOINVERT
@@ -408,7 +393,7 @@ BEGIN
     VK_OEM_MINUS,   ID_VIEW_ZOOMOUT,        VIRTKEY, CONTROL, NOINVERT
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

@@ -61,7 +61,7 @@ void CLinearGraphStatusPanel::SetInformation(const CDataObjectPtr& pData)
 {
     m_strFileName = pData->file;
 
-    if( pData->hasTimestamp() )
+    if( pData->HasTimeStamp() )
     {
         SYSTEMTIME stDate = {0};
         ::FileTimeToSystemTime((FILETIME*)&(pData->timeStamp), &stDate);
@@ -72,7 +72,7 @@ void CLinearGraphStatusPanel::SetInformation(const CDataObjectPtr& pData)
             (DWORD)stDate.wMilliseconds
             );
 
-        m_strFrequency.Format(L"%.4fHz", pData->getFrequency());
+        m_strFrequency.Format(L"%.4fHz", pData->GetSamplingRate());
     }
     
     m_strPointCount.Format(L"%dpts", pData->length);

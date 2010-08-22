@@ -4,7 +4,6 @@
 #include <vector>
 
 class CDataObject;
-
 class CDataObjectPtr
 {
 public:
@@ -70,9 +69,9 @@ private:
     ~CDataObject();
 
 public:
-    LONG*       data;           // Sample data, may be amplified
     LONG        length;         // Number of points in this sample
-    LONG        factor;         // Constant factor used to amplify the data
+    LONG*       data;           // Scaled sample value
+    LONG        factor;         // data = factor * original_data
     ULONGLONG   timeStamp;      // Actually a FILETIME struct
     DWORD       freqNume;       // Frequency, numerator
     DWORD       freqDeno;       // Frequency, denominator
@@ -87,33 +86,28 @@ protected:
 public:
     static CDataObjectPtr CreateObject(LONG nLen);
 
-    BOOL hasTimestamp() const
+    BOOL HasTimeStamp() const
     {
         return timeStamp && freqDeno && freqNume;
     }
 
-    DOUBLE getFrequency() const
+    DOUBLE GetSamplingRate() const
     {
         return (DOUBLE)freqNume / freqDeno;
     }
-
-    BOOL getDateTime(SYSTEMTIME& st) const
-    {
-        return ::FileTimeToSystemTime((FILETIME*)&timeStamp, &st);
-    }
-
-    ULONGLONG getTimeSpan() const
+    
+    ULONGLONG TimeSpan() const
     {
         return length * (ULONGLONG)freqDeno / freqNume;
     }
 
-    BOOL isCompatibleWith(const CDataObjectPtr& r) const
+    BOOL IsCompatibleWith(const CDataObjectPtr& r) const
     {
         return length == r->length && timeStamp == r->timeStamp
             && freqNume == r->freqNume && freqDeno == r->freqDeno;
     }
 
-    void trimFrequency()
+    void TrimFrequency()
     {
         if( !freqDeno || !freqNume )
         {
@@ -215,36 +209,40 @@ private:
     static DWORD __fastcall CountColumn(PCSTR pData, DWORD cbSize);
     static DWORD __fastcall CountWord(PCSTR pData, DWORD cbSize);
 
-    static BOOL IsTimeStamp(PCSTR pData)
-    {
-        // Compare with 1900010100, which is the minimum value accepted as a decimal
-        //string represented timestamp
-        //
-        return pData ? (_atoi64(pData) > 0x0713FDA74) : false;
-    }
-
-    static BOOL IsWhitespace(char ch)
+    static int is_whitespace(char ch)
     {
         return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
     }
 
-    static BOOL IsLegalCharacter(char ch)
+    static int is_legal_char(char ch)
     {
-        return IsWhitespace(ch)
-            || (ch >= '0' && ch <= '9') || ch == '+' || ch == '-';
+        return is_whitespace(ch) || (ch>='0' && ch<='9') || ch=='+' || ch=='-';
     }
 
     //  To be faster, this method runs without boundary check
-    //  countLine, countColumn and countWord ensure that calling of nextWord
-    // is carefully controlled and thus in no circumstance will nextWord cause
-    // access violation
+    //  Thus eat_word may cause access violation in case the stream pointed by
+    // p is not whitespace terminated or the number of calling time is not
+    // carefully controlled
     //
-    inline static void NextWord(const char*& gp)
+    static void eat_word(const char*& p)
     {
-        while( IsWhitespace(*gp) ) { ++gp; }
-        while( !IsWhitespace(*gp) ){ ++gp; }
+        while( is_whitespace(*p) )
+        {
+            ++p;
+        }
+        while( !is_whitespace(*p) )
+        {
+            ++p;
+        }
     }
 
+    static int is_timestamp(const char* p)
+    {
+        // Compare with 1900010100, which is the minimum value accepted as a decimal
+        //string represented timestamp
+        //
+        return p ? (_atoi64(p) > 0x0713FDA74) : false;
+    }
 };
 
 class CBinSampleFile : public ISampleFile

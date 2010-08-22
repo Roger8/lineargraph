@@ -228,7 +228,7 @@ COLORREF CLinearGraphView::GetBackgroundColor() const
 
 BOOL CLinearGraphView::GetDateTime(SYSTEMTIME& stDate, DWORD& fbase, DWORD& fmulti) const
 {
-    if( !m_pData || !m_pData->hasTimestamp() )
+    if( !m_pData || !m_pData->HasTimeStamp() )
     {
         return FALSE;
     }
@@ -469,7 +469,7 @@ void CLinearGraphView::OnLButtonDown(DWORD dwFlags, int x, int y)
     m_nSelectY = y;
 
     SetFocus();
-    SendParentalNotification(LinearGraphViewActivate);
+    SendParentalNotification(MSG_ViewActivate);
     SetCapture();
     m_bTrackSelection = TRUE;
     InvalidateRect();
@@ -494,7 +494,7 @@ void CLinearGraphView::OnLButtonUp(DWORD dwFlags, int x, int y)
 
 void CLinearGraphView::OnRButtonDown(DWORD dwFlags, int x, int y)
 {
-    SendParentalNotification(LinearGraphViewActivate);
+    SendParentalNotification(MSG_ViewActivate);
 }
 
 void CLinearGraphView::OnSelectTransform(RECT& rcSelect)
@@ -537,7 +537,7 @@ BOOL CLinearGraphView::BindData(CDataObjectPtr& pData)
 
 BOOL CLinearGraphView::AddComparison(CLinearGraphView& cmpV, BOOL bRefresh)
 {
-    if( !m_pData->isCompatibleWith(cmpV.GetDataObject()) )
+    if( !m_pData->IsCompatibleWith(cmpV.GetDataObject()) )
     {
         return FALSE;
     }
@@ -757,7 +757,7 @@ void CLinearGraphView::DrawRuler(HDC dc, CRectangle& rcCanvas, CRectangle& rcCli
     for(vUnit  = 10; vUnit * vSections < vScope; vUnit += 10);
     DrawVerticalAxis(dc, ptStart, vSections, vUnit);
 
-    if( m_pData->hasTimestamp() && (m_dwOptionSet & OptTimeLabelOnHAxis) )
+    if( m_pData->HasTimeStamp() && !(m_dwOptionSet & OptHAxisDataIndex) )
     {
         LONGLONG t64;
         SYSTEMTIME stBegin, stEnd;
@@ -934,9 +934,12 @@ void CLinearGraphView::DrawTimeAxis(
             {
                 t += (datePrecision == Second) ? 10000000 : 150000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
-                    sectDate.wMinute, unitName[Minute],
-                    sectDate.wSecond, unitName[Second]);
+                if(m_dwOptionSet & OptHAxisChineseTime)
+                {
+                    cchText = ::swprintf(labelBuff, 32, L"%02d%c%02d%c",
+                        sectDate.wMinute, unitName[Minute],
+                        sectDate.wSecond, unitName[Second]);
+                }
             }
             break;
         case Minute:
@@ -944,9 +947,12 @@ void CLinearGraphView::DrawTimeAxis(
             {
                 t += (datePrecision == Minute) ? 600000000 : 9000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
-                    sectDate.wHour, unitName[Hour],
-                    sectDate.wMinute, unitName[Minute]);
+                if(m_dwOptionSet & OptHAxisChineseTime)
+                {
+                    cchText = ::swprintf(labelBuff, 32, L"%02d%c%02d%c",
+                        sectDate.wHour, unitName[Hour],
+                        sectDate.wMinute, unitName[Minute]);
+                }
             }
             break;
         case Hour:
@@ -954,18 +960,24 @@ void CLinearGraphView::DrawTimeAxis(
             {
                 t += (datePrecision == Hour) ? 36000000000 : 108000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
-                    sectDate.wDay, unitName[Day],
-                    sectDate.wHour, unitName[Hour]);
+                if(m_dwOptionSet & OptHAxisChineseTime)
+                {
+                    cchText = ::swprintf(labelBuff, 32, L"%02d%c%02d%c",
+                        sectDate.wDay, unitName[Day],
+                        sectDate.wHour, unitName[Hour]);
+                }
             }
             break;
         case Day:
             {
                 t += 864000000000;
                 ::FileTimeToSystemTime((FILETIME*)&t, &sectDate);
-                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
-                    sectDate.wMonth, unitName[Month],
-                    sectDate.wDay, unitName[Day]);
+                if(m_dwOptionSet & OptHAxisChineseTime)
+                {
+                    cchText = ::swprintf(labelBuff, 32, L"%02d%c%02d%c",
+                        sectDate.wMonth, unitName[Month],
+                        sectDate.wDay, unitName[Day]);
+                }
             }
             break;
         case Month:
@@ -980,20 +992,43 @@ void CLinearGraphView::DrawTimeAxis(
                     sectDate.wMonth = 1;
                 }
                 ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
-                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
-                    sectDate.wYear, unitName[Year],
-                    sectDate.wMonth, unitName[Month]);
+                if(m_dwOptionSet & OptHAxisChineseTime)
+                {
+                    cchText = ::swprintf(labelBuff, 32, L"%02d%c%02d%c",
+                        sectDate.wYear, unitName[Year],
+                        sectDate.wMonth, unitName[Month]);
+                }
             }
             break;
         case Year:
             {
                 ++sectDate.wYear;
                 ::SystemTimeToFileTime(&sectDate, (FILETIME*)&t);
-                cchText = ::swprintf(labelBuff, 32, L"%d%c%d%c",
-                    sectDate.wYear, unitName[Year],
-                    sectDate.wMonth, unitName[Month]);
+                if(m_dwOptionSet & OptHAxisChineseTime)
+                {
+                    cchText = ::swprintf(labelBuff, 32, L"%02d%c%02d%c",
+                        sectDate.wYear, unitName[Year],
+                        sectDate.wMonth, unitName[Month]);
+                }
             }
             break;
+        }
+
+        if( !(m_dwOptionSet & OptHAxisChineseTime) )
+        {
+            switch( datePrecision )
+            {
+            case Year:
+            case Month:
+            case Day:
+                cchText = ::swprintf(labelBuff, 32, L"%04d/%02d/%02d",
+                    sectDate.wYear, sectDate.wMonth, sectDate.wDay);
+                break;
+            default:
+                cchText = ::swprintf(labelBuff, 32, L"%02d:%02d:%02d",
+                    sectDate.wHour, sectDate.wMinute, sectDate.wSecond);
+                break;
+            }
         }
 
         TimeToIndex(t, apt[0].x);
@@ -1409,7 +1444,7 @@ BOOL CLinearGraphView::ClientPtToGraphPt(POINT& pt) const
 
 BOOL CLinearGraphView::IndexToTime(LONG x, LONGLONG& t) const
 {
-    if( !m_pData->hasTimestamp() )
+    if( !m_pData->HasTimeStamp() )
     {
         return FALSE;
     }
@@ -1420,7 +1455,7 @@ BOOL CLinearGraphView::IndexToTime(LONG x, LONGLONG& t) const
 
 BOOL CLinearGraphView::TimeToIndex(LONGLONG t, LONG& x) const
 {
-    if( !m_pData->hasTimestamp() )
+    if( !m_pData->HasTimeStamp() )
     {
         return FALSE;
     }

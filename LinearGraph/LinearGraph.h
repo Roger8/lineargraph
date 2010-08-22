@@ -28,7 +28,8 @@
 #include <math.h>
 
 #include <vector>
-
+#include <map>
+#include <string>
 typedef std::vector<bool>   CMaskVect;
 
 enum Messages
@@ -36,17 +37,17 @@ enum Messages
     // WPARAM, reinterpreted as size_t, length of document path
     // LPARAM, reinterpreted as PCWSTR, pointer to document path
     //
-    LinearGraphOpenDocument = WM_USER+1,
+    MSG_OpenDocument = WM_USER+1,
 
     // WPARAM, not used
     // LPARAM, reinterpreted as CLinearGraphView*, pointer to the view
     //that sends this message
     //
-    LinearGraphViewActivate,
+    MSG_ViewActivate,
 
     // WPARAM, reinterpreted as UINT, ID of the tab control
     // LPARAM, reinterpreted as CWindow*, pointer to the window that
     //invokes this notification
     //
-    LinearGraphTabSelectChange,
+    MSG_TabSelectChange,
 };

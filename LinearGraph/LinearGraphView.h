@@ -96,17 +96,18 @@ public:
 
     enum OptionFlags
     {
-        OptNone = 0,
-        OptAll = 0xFFFFFFFF,
+        OptNone                 = 0,
+        OptAll                  = 0xFFFFFFFF,
 
-        OptRuler = 0x0001,
-        OptHorizontalLine = 0x0002,
-        OptPositionLabel = 0x0004,
+        OptRuler                = 0x0001,
+        OptHorizontalLine       = 0x0002,
+        OptPositionLabel        = 0x0004,
         OptTranslucentSelection = 0x0008,
-        OptLegend = 0x0010,
-        OptCoordinates = 0x0020,
-        OptTimeLabelOnHAxis = 0x0040,
-        OptSelectionTransform = 0x1000,
+        OptLegend               = 0x0010,
+        OptCoordinates          = 0x0020,
+        OptHAxisDataIndex       = 0x0040,
+        OptHAxisChineseTime     = 0x0080,
+        OptSelectionTransform   = 0x1000
     };
 
     enum Constants

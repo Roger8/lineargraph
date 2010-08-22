@@ -197,7 +197,7 @@ private:
     enum
     {
         FileMenu = 0, EditMenu, LayoutMenu, ViewMenu,
-        AnalyzeMenu, OptionMenu, HelpMenu
+        AnalyzeMenu, ToolMenu, HelpMenu
     };
 
     void BeginHeavyTask()
@@ -252,7 +252,9 @@ private:
     void OnViewCoord();
     void OnViewLegend();
     void OnViewPosLabel();
-    void OnViewShowTimeAxis();
+    void OnViewHAxisIndex();
+    void OnViewHAxisStdTime();
+    void OnViewHAxisChineseTime();
     void OnViewRestore();
     void OnViewZoomIn();
     void OnViewZoomOut();
@@ -262,8 +264,9 @@ private:
     void OnAnalyzeLinear();
     void OnAnalyzePower();
     void OnAnalyzeDiff();
-    void OnOptTranslucentSel();
-    void OnOptSelectTransform();
+    void OnToolTranslucentSel();
+    void OnToolSelectTransform();
+    void OnToolOpenLogDir();
     void OnHelpAbout();
     void OnHelpHelp();
 

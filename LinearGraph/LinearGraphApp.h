@@ -21,6 +21,7 @@ public:
     static HFONT  GetThemeFont();
     static HBRUSH GetThemeBrush();
     static HBRUSH GetThemeToolWindowBrush();
+    static CString GetLogDirectory();
 
     void BeginHeavyTask();
     void EnterHeavyTaskStep(UINT stepStrinID);

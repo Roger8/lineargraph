@@ -36,7 +36,7 @@ BOOL CSourceSelectDlg::OnInitDialog()
             buf.Format(L"%I64d", m_vSource[i]->timeStamp);
             m_listView.SetItemText((int)i, 1, buf);
 
-            buf.Format(L"%f", m_vSource[i]->getFrequency());
+            buf.Format(L"%f", m_vSource[i]->GetSamplingRate());
             m_listView.SetItemText((int)i, 2, buf);
 
             buf.Format(L"%d", m_vSource[i]->length);
@@ -471,7 +471,12 @@ BOOL CLinearTransformDialog::OnCommand(UINT uCode, UINT uID, HWND hCtrl)
 CLinearGraphFrameWnd::CLinearGraphFrameWnd()
     : m_pLastActiveView(0)
 {
-    m_dwViewOpts = ~CLinearGraphView::OptHorizontalLine;
+    // Set default view options
+    m_dwViewOpts = -1;
+    m_dwViewOpts ^= CLinearGraphView::OptHorizontalLine;
+    m_dwViewOpts ^= CLinearGraphView::OptHAxisDataIndex;
+    m_dwViewOpts ^= CLinearGraphView::OptHAxisChineseTime;
+
     m_layoutStyle = TabbedDoc;
 }
 
@@ -521,7 +526,7 @@ BOOL CLinearGraphFrameWnd::GetCustomizedColor(COLORREF& clr) const
 
 BOOL CLinearGraphFrameWnd::OpenDocument(PWSTR szDocName)
 {
-    return Send(LinearGraphOpenDocument,
+    return Send(MSG_OpenDocument,
         (WPARAM)wcslen(szDocName), (LPARAM)szDocName);
 }
 
@@ -613,7 +618,7 @@ int  CLinearGraphFrameWnd::PreProcessMessage(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch( msg )
 	{
-    case LinearGraphOpenDocument:
+    case MSG_OpenDocument:
         {
             if( (size_t)wp != wcslen((PCWSTR)lp) )
             {
@@ -622,10 +627,10 @@ int  CLinearGraphFrameWnd::PreProcessMessage(UINT msg, WPARAM wp, LPARAM lp)
             return OnOpenDocument((PCWSTR)lp);
         }
         break;
-    case LinearGraphViewActivate:
+    case MSG_ViewActivate:
         OnActivateView((CLinearGraphView*)lp);
         break;
-    case LinearGraphTabSelectChange:
+    case MSG_TabSelectChange:
         {
             if( wp == CLinearGraphToolPanel::IDC_TABPANEL )
             {
@@ -757,10 +762,12 @@ void CLinearGraphFrameWnd::OnCommand(UINT uCode, UINT uID, HWND hCtrl)
     case ID_VIEW_ZOOMOUT:       return OnViewZoomOut();
     case ID_VIEW_RESTORE:       return OnViewRestore();
     case ID_VIEW_POSLABEL:      return OnViewPosLabel();
-    case ID_VIEW_SHOWTIMEAXIS:  return OnViewShowTimeAxis();
     case ID_VIEW_COORD:         return OnViewCoord();
     case ID_VIEW_LEGEND:        return OnViewLegend();
     case ID_VIEW_CLEARCMP:      return OnViewClearCmp();
+    case ID_VIEW_HAXIS_INDEX:   return OnViewHAxisIndex();
+    case ID_VIEW_HAXIS_STDTIME: return OnViewHAxisStdTime();
+    case ID_VIEW_HAXIS_CHINESETIME: return OnViewHAxisChineseTime();
 
     case ID_ANALYZE_COMPARE:    return OnAnalyzeCompare();
     case ID_ANALYZE_SYNC:       return OnAnalyzeSyncSelect();
@@ -768,8 +775,9 @@ void CLinearGraphFrameWnd::OnCommand(UINT uCode, UINT uID, HWND hCtrl)
     case ID_ANALYZE_POWER:      return OnAnalyzePower();
     case ID_ANALYZE_DIFF:       return OnAnalyzeDiff();
 
-    case ID_OPT_TRANSLUCENTSEL: return OnOptTranslucentSel();
-    case ID_OPT_SELECTTRANSFORM:return OnOptSelectTransform();
+    case ID_TOOL_TRANSLUCENTSEL:    return OnToolTranslucentSel();
+    case ID_TOOL_SELECTTRANSFORM:   return OnToolSelectTransform();
+    case ID_TOOL_OPENLOGDIR:        return OnToolOpenLogDir();
     
     case ID_HELP_ABOUT:         return OnHelpAbout();
     case ID_HELP_HELP:          return OnHelpHelp();
@@ -851,23 +859,54 @@ void CLinearGraphFrameWnd::OnInitMenuPopup(HMENU hMenu, UINT nPos, BOOL bIsWindo
             ::SetMenuItemInfo(hMenu, ID_VIEW_ZOOMIN, FALSE, &mii);
             ::SetMenuItemInfo(hMenu, ID_VIEW_ZOOMOUT, FALSE, &mii);
 
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptRuler) ? MFS_CHECKED : 0;
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptRuler)
+                ? MFS_CHECKED : MFS_UNCHECKED;
             ::SetMenuItemInfo(hMenu, ID_VIEW_RULER, FALSE, &mii);
 
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptHorizontalLine) ? MFS_CHECKED : 0;
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptHorizontalLine)
+                ? MFS_CHECKED : MFS_UNCHECKED;
             ::SetMenuItemInfo(hMenu, ID_VIEW_HORZLINE, FALSE, &mii);
 
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptCoordinates) ? MFS_CHECKED : 0;
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptCoordinates)
+                ? MFS_CHECKED : MFS_UNCHECKED;
             ::SetMenuItemInfo(hMenu, ID_VIEW_COORD, FALSE, &mii);
 
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptLegend) ? MFS_CHECKED : 0;
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptLegend)
+                ? MFS_CHECKED : MFS_UNCHECKED;
             ::SetMenuItemInfo(hMenu, ID_VIEW_LEGEND, FALSE, &mii);
 
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptPositionLabel) ? MFS_CHECKED : 0;
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptPositionLabel)
+                ? MFS_CHECKED : MFS_UNCHECKED;
             ::SetMenuItemInfo(hMenu, ID_VIEW_POSLABEL, FALSE, &mii);
 
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptTimeLabelOnHAxis) ? MFS_CHECKED : 0;
-            ::SetMenuItemInfo(hMenu, ID_VIEW_SHOWTIMEAXIS, FALSE, &mii);
+            static const DWORD radioGroup[] = 
+            {
+                ID_VIEW_HAXIS_STDTIME,
+                ID_VIEW_HAXIS_INDEX,
+                ID_VIEW_HAXIS_CHINESETIME,
+                ID_VIEW_HAXIS_INDEX    // OptHAxisDataIndex option has higher priority
+            };
+
+            // If both OptHAxisDataIndex bit and OptHAxisChineseTime bit are set
+            // iCheck will be set to 3, thus menu item with command 
+            // ID_VIEW_HAXIS_INDEX will be checked
+            //
+            DWORD iCheck = 0;
+
+            if( m_dwViewOpts & CLinearGraphView::OptHAxisDataIndex )
+            {
+                iCheck |= 1;
+            }
+            if( m_dwViewOpts & CLinearGraphView::OptHAxisChineseTime )
+            {
+                iCheck |= 2;
+            }
+
+            for(int i = 0; i < sizeof(radioGroup)/sizeof(DWORD); ++i)
+            {
+                ::CheckMenuItem(hMenu, radioGroup[i], MFS_UNCHECKED);
+            }
+            ::CheckMenuItem(hMenu, radioGroup[iCheck], MFS_CHECKED);
         }
         break;
     case AnalyzeMenu:
@@ -882,12 +921,14 @@ void CLinearGraphFrameWnd::OnInitMenuPopup(HMENU hMenu, UINT nPos, BOOL bIsWindo
             ::SetMenuItemInfo(hMenu, ID_ANALYZE_DIFF, FALSE, &mii);
         }
         break;
-    case OptionMenu:
+    case ToolMenu:
         {
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptSelectionTransform) ? MFS_CHECKED : 0;
-            ::SetMenuItemInfo(hMenu, ID_OPT_SELECTTRANSFORM, FALSE, &mii);
-            mii.fState = (m_dwViewOpts & CLinearGraphView::OptTranslucentSelection) ? MFS_CHECKED : 0;
-            ::SetMenuItemInfo(hMenu, ID_OPT_TRANSLUCENTSEL, FALSE, &mii);
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptSelectionTransform)
+                ? MFS_CHECKED : MFS_UNCHECKED;
+            ::SetMenuItemInfo(hMenu, ID_TOOL_SELECTTRANSFORM, FALSE, &mii);
+            mii.fState = (m_dwViewOpts & CLinearGraphView::OptTranslucentSelection)
+                ? MFS_CHECKED : MFS_UNCHECKED;
+            ::SetMenuItemInfo(hMenu, ID_TOOL_TRANSLUCENTSEL, FALSE, &mii);
         }
         break;
     case HelpMenu:
@@ -940,7 +981,7 @@ BOOL CLinearGraphFrameWnd::OnOpenDocument(PCWSTR szFileName)
     if( !doc.Open(szFileName) )
     {
         LG_ERROR("Failed to open document: %ws", szFileName);
-        CLinearGraphApp::GetApp()->EndHeavyTask();
+        //CLinearGraphApp::GetApp()->EndHeavyTask();
         return FALSE;
     }
 
@@ -1172,7 +1213,7 @@ void CLinearGraphFrameWnd::OnFileExportData()
         return ;
     }
 
-    CSaveDataDlg dlg(m_pLastActiveView->GetDataObject()->hasTimestamp());
+    CSaveDataDlg dlg(m_pLastActiveView->GetDataObject()->HasTimeStamp());
     dlg.SetCaption(IDS_EXPORT_DATA);
     if( dlg.DoModal(this) != IDOK )
     {
@@ -1198,7 +1239,7 @@ void CLinearGraphFrameWnd::OnFileSave()
         return ;
     }
 
-    CSaveDataDlg dlg(m_pLastActiveView->GetDataObject()->hasTimestamp());
+    CSaveDataDlg dlg(m_pLastActiveView->GetDataObject()->HasTimeStamp());
     dlg.SetCaption(IDS_SAVE_DATA);
     if( dlg.DoModal(this) != IDOK )
     {
@@ -1217,7 +1258,7 @@ BOOL CLinearGraphFrameWnd::SaveDataToFile(const CDataObjectPtr pdo, CRectangle* 
 {
     LG_TRACE_FUNCTION();
     
-    if( !pdo->hasTimestamp() && dwFormat == CSaveDataDlg::DataTXTWithTimestamp )
+    if( !pdo->HasTimeStamp() && dwFormat == CSaveDataDlg::DataTXTWithTimestamp )
     {
         return FALSE;
     }
@@ -1500,15 +1541,34 @@ void CLinearGraphFrameWnd::OnViewPosLabel()
     UpdateViewOptions();
 }
 
-void CLinearGraphFrameWnd::OnViewShowTimeAxis()
+void CLinearGraphFrameWnd::OnViewHAxisIndex()
 {
     LG_TRACE_FUNCTION();
 
-    m_dwViewOpts ^= CLinearGraphView::OptTimeLabelOnHAxis;
+    m_dwViewOpts |= CLinearGraphView::OptHAxisDataIndex;
+    m_dwViewOpts &= ~(CLinearGraphView::OptHAxisChineseTime);
     UpdateViewOptions();
 }
 
-void CLinearGraphFrameWnd::OnOptTranslucentSel()
+void CLinearGraphFrameWnd::OnViewHAxisStdTime()
+{
+    LG_TRACE_FUNCTION();
+    
+    m_dwViewOpts &= ~(CLinearGraphView::OptHAxisDataIndex);
+    m_dwViewOpts &= ~(CLinearGraphView::OptHAxisChineseTime);
+    UpdateViewOptions();
+}
+
+void CLinearGraphFrameWnd::OnViewHAxisChineseTime()
+{
+    LG_TRACE_FUNCTION();
+
+    m_dwViewOpts &= ~(CLinearGraphView::OptHAxisDataIndex);
+    m_dwViewOpts |= CLinearGraphView::OptHAxisChineseTime;
+    UpdateViewOptions();
+}
+
+void CLinearGraphFrameWnd::OnToolTranslucentSel()
 {
     LG_TRACE_FUNCTION();
 
@@ -1516,12 +1576,17 @@ void CLinearGraphFrameWnd::OnOptTranslucentSel()
     UpdateViewOptions();
 }
 
-void CLinearGraphFrameWnd::OnOptSelectTransform()
+void CLinearGraphFrameWnd::OnToolSelectTransform()
 {
     LG_TRACE_FUNCTION();
 
     m_dwViewOpts ^= CLinearGraphView::OptSelectionTransform;
     UpdateViewOptions();
+}
+
+void CLinearGraphFrameWnd::OnToolOpenLogDir()
+{
+    ShellExecuteW(0, L"open", CLinearGraphApp::GetLogDirectory(), 0, 0, SW_SHOW);
 }
 
 void CLinearGraphFrameWnd::OnViewRestore()
@@ -1580,7 +1645,7 @@ void CLinearGraphFrameWnd::OnAnalyzeCompare()
     CSourceSelectDlg dlg;
     for(size_t i = 0; i < m_vpData.size(); ++i)
     {
-        if( m_vpData[i] != pdo && m_vpData[i]->isCompatibleWith(pdo) )
+        if( m_vpData[i] != pdo && m_vpData[i]->IsCompatibleWith(pdo) )
         {
             dlg.m_vSource.push_back(m_vpData[i]);
         }
@@ -1617,7 +1682,7 @@ void CLinearGraphFrameWnd::OnAnalyzeSyncSelect()
     CSourceSelectDlg dlg;
     for(size_t i = 0; i < m_vpData.size(); ++i)
     {
-        if( m_vpData[i] != pdo && m_vpData[i]->isCompatibleWith(pdo) )
+        if( m_vpData[i] != pdo && m_vpData[i]->IsCompatibleWith(pdo) )
         {
             dlg.m_vSource.push_back(m_vpData[i]);
         }

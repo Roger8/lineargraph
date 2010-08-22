@@ -16,7 +16,6 @@
 #define IDS_NUMERIC_OVERFLOW            123
 #define IDS_SELECT_TARGET_FOLDER        124
 #define IDS_SOURCE_NAME                 125
-#define IDD_DLG_SETTINGS                125
 #define IDS_FREQUENCY                   126
 #define IDS_TIMESTAMP                   127
 #define IDS_DATAPTS                     128
@@ -40,7 +39,7 @@
 #define IDS_DATAFMT_BIN                 146
 #define IDS_DATAFMT_TEXT                147
 #define IDS_DATAFMT_TEXT_WITHTIME       148
-#define IDS_APPLICATIOIN_BUSY           149
+#define IDS_APPLICATION_BUSY            149
 #define IDS_OPEN_DOCUMENT               150
 #define IDS_PREPARE_VIEW                151
 #define IDS_TASKMONITOR_CAPTION         152
@@ -103,26 +102,26 @@
 #define ID_ANALYZE_POWER                40027
 #define ID_ANALYZE_DIFF                 40028
 #define ID_ANALYZE_COMPARE              40029
-#define ID_OPT_TRANSLUCENTSEL           40030
-#define ID_OPT_SELECTTRANSFORM          40031
+#define ID_TOOL_TRANSLUCENTSEL          40030
+#define ID_TOOL_SELECTTRANSFORM         40031
 #define ID_HELP_ABOUT                   40032
 #define ID_LAYOUT_TAB                   40034
 #define ID_LAYOUT_SINGLECOL             40035
 #define ID_LAYOUT_DICOL                 40036
 #define ID_LAYOUT_TRECOL                40037
 #define ID_HELP_HELP                    40038
-#define ID_EDIT_RELOAD                  40040
-#define ID_40043                        40043
-#define ID_VIEW_                        40044
-#define ID_VIEW_SHOWTIMEAXIS            40045
-#define ID_40046                        40046
+#define ID_EDIT_RELOAD                  40039
+#define ID_TOOL_OPENLOGDIR              40040
+#define ID_VIEW_HAXIS_CHINESETIME       40041
+#define ID_VIEW_HAXIS_STDTIME           40042
+#define ID_VIEW_HAXIS_INDEX             40043
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        126
-#define _APS_NEXT_COMMAND_VALUE         40047
+#define _APS_NEXT_COMMAND_VALUE         40044
 #define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

@@ -55,7 +55,7 @@ void CLinearGraphToolPanel::OnNotify(UINT uID, NMHDR* pNmhdr)
     case IDC_TABPANEL:
         if( pNmhdr->code == TCN_SELCHANGE )
         {
-            m_pFrame->Send(LinearGraphTabSelectChange, IDC_TABPANEL, (LPARAM)this);
+            m_pFrame->Send(MSG_TabSelectChange, IDC_TABPANEL, (LPARAM)this);
             InvalidateRect();
         }
         break;

@@ -101,7 +101,9 @@ BOOL CTextFile::Open(PCWSTR fileName)
         return FALSE;
     }
 
-    char* pData = new char[m_cbSize];
+    char* pData = new char[m_cbSize+2];
+    pData[m_cbSize] = '\n';
+    pData[m_cbSize+1] = 0;
     ::ReadFile(hFile, pData, m_cbSize, &dwSize, 0);
     if( dwSize != m_cbSize )
     {
@@ -156,8 +158,8 @@ BOOL CTextSampleFile::Open(PCWSTR szFileName)
     nLines   = CountLine(textFile.GetData(), textFile.GetSize());
     nColumns = CountColumn(textFile.GetData(), textFile.GetSize());
     nWords   = CountWord(textFile.GetData(), textFile.GetSize());
-    LG_TRACE("File Statistics: %d lines, %d columns, %d words",
-        nLines, nColumns, nWords);
+    LG_TRACE("File Statistics: %s type, %d lines, %d columns, %d words",
+        (dataType==IntegerData) ? "Integer":"Float", nLines, nColumns, nWords);
 
     if( nWords != nLines * nColumns )
     {
@@ -165,7 +167,7 @@ BOOL CTextSampleFile::Open(PCWSTR szFileName)
         return FALSE;
     }
 
-    BOOL fTimeStamp = IsTimeStamp(textFile.GetData());
+    BOOL fTimeStamp = is_timestamp(textFile.GetData());
     if( fTimeStamp )
     {
         --nColumns;
@@ -201,12 +203,10 @@ BOOL CTextSampleFile::Open(PCWSTR szFileName)
     switch( dataType )
     {
     case IntegerData:
-        LG_TRACE("Data type: Integer");
-        ReadInt(textFile.GetData(), nLines, nColumns);
+        LG_TRACE_PERFORMANCE(ReadInt(textFile.GetData(), nLines, nColumns));
         break;
     case FloatData:
-        LG_TRACE("Data type: Float");
-        ReadFloat(textFile.GetData(), nLines, nColumns);
+        LG_TRACE_PERFORMANCE(ReadFloat(textFile.GetData(), nLines, nColumns));
         break;
     }
     return TRUE;
@@ -258,7 +258,7 @@ void CTextSampleFile::ReadTimeStamp(PCSTR pData, DWORD cbSize)
         m_vSamples[i]->timeStamp = tBegin;
         m_vSamples[i]->freqDeno  = (DWORD)((tEnd - tBegin) / 10000);
         m_vSamples[i]->freqNume = (DWORD)fmulti * 1000;
-        m_vSamples[i]->trimFrequency();
+        m_vSamples[i]->TrimFrequency();
     }
 }
 
@@ -306,12 +306,16 @@ DWORD __fastcall CTextSampleFile::CheckDataType(PCSTR pData, DWORD cbSize)
         {
             bFloat = TRUE;
         }
-        else if( !IsLegalCharacter(pData[i]) )
+        else if( !is_legal_char(pData[i]) )
         {
             return UnsupportedDataType;
         }
     }
-    return bFloat ? FloatData : IntegerData;
+
+    // Float data is not supported yet
+    //
+    //return bFloat ? FloatData : IntegerData;
+    return IntegerData;
 }
 
 DWORD CTextSampleFile::CountLine(PCSTR pData, DWORD cbSize)
@@ -322,7 +326,7 @@ DWORD CTextSampleFile::CountLine(PCSTR pData, DWORD cbSize)
         if( '\n' == pData[i++] )
         {
             // Skip blank lines
-            while( (i<cbSize) && IsWhitespace(pData[i]) )
+            while( (i<cbSize) && is_whitespace(pData[i]) )
             {
                 ++i;
             }
@@ -357,7 +361,7 @@ DWORD CTextSampleFile::CountWord(PCSTR pData, DWORD cbSize)
 
     for(DWORD i = 0; i < cbSize; ++i)
     {
-        if( IsWhitespace(pData[i]) )
+        if( is_whitespace(pData[i]) )
         {
             dfaState = 0;
         }
@@ -380,15 +384,15 @@ void CTextSampleFile::ReadInt(const char* gp, DWORD cLn, DWORD cCol)
         apData[i] = m_vSamples[i]->data;
     }
 
-    if( IsTimeStamp(gp) )
+    if( is_timestamp(gp) )
     {
         for(DWORD i = 0; i < cLn; ++i)
         {
-            NextWord(gp); // Skip time stamp
+            eat_word(gp); // Skip time stamp
             for (DWORD j = 0; j < cCol; ++j)
             {
                 apData[j][i] = atoi(gp);
-                NextWord(gp);
+                eat_word(gp);
             }
         }
     }
@@ -399,7 +403,7 @@ void CTextSampleFile::ReadInt(const char* gp, DWORD cLn, DWORD cCol)
             for (DWORD j = 0; j < cCol; ++j)
             {
                 apData[j][i] = atoi(gp);
-                NextWord(gp);
+                eat_word(gp);
             }
         }
     }
@@ -418,14 +422,14 @@ void CTextSampleFile::ReadFloat(const char* gp, DWORD cLn, DWORD cCol)
     }
 
     char* p;
-    if( IsTimeStamp(gp) )
+    if( is_timestamp(gp) )
     {
         for(DWORD i = 0; i < cLn; ++i)
         {
-            NextWord(gp); // Skip time stamp
+            eat_word(gp); // Skip time stamp
             for (DWORD j = 0; j < cCol; ++j)
             {
-                apData[j][i] = (LONG)(strtod(gp, &p) * 1000 + 0.5);
+                apData[j][i] = (LONG)(strtod(gp, &p) * 1000);
                 gp = p;
             }
         }
@@ -436,7 +440,7 @@ void CTextSampleFile::ReadFloat(const char* gp, DWORD cLn, DWORD cCol)
         {
             for (DWORD j = 0; j < cCol; ++j)
             {
-                apData[j][i] = (LONG)(strtod(gp, &p) * 1000 + 0.5);
+                apData[j][i] = (LONG)(strtod(gp, &p) * 1000);
                 gp = p;
             }
         }
@@ -515,7 +519,7 @@ BOOL CBinSampleFile::Open(PCWSTR szFileName)
     pData->file = szFileName;
     pData->index = 0;
     GetObjectName(pData->file, pData->name);
-    pData->trimFrequency();
+    pData->TrimFrequency();
 
     m_pData = pData;
     return TRUE;

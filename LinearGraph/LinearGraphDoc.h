@@ -204,6 +204,7 @@ private:
     void  AsciiTimeTrim(LONGLONG& asciit);
     void  AsciiTimeToFileTime(LONGLONG& asciit);
 
+public:
     static DWORD __fastcall CheckDataType(PCSTR pData, DWORD cbSize);
     static DWORD __fastcall CountLine(PCSTR pData, DWORD cbSize);
     static DWORD __fastcall CountColumn(PCSTR pData, DWORD cbSize);

@@ -148,8 +148,9 @@ BOOL CTextSampleFile::Open(PCWSTR szFileName)
 
     DWORD dataType;
     dataType = CheckDataType(textFile.GetData(), textFile.GetSize());
-    if( dataType == UnsupportedDataType )
+    if( dataType != IntegerData )
     {
+        ::SetLastError(ERROR_UNSUPPORTED_TYPE);
         LG_ERROR("CTextFile::Open Failed [Unsupported Data Type]");
         return FALSE;
     }

@@ -13,11 +13,13 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Chinese (Simplified, PRC) resources
+// Chinese (P.R.C.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
 #pragma code_page(936)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -124,7 +126,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
+GUIDELINES DESIGNINFO 
 BEGIN
     IDD_DLG_LINEAR, DIALOG
     BEGIN
@@ -156,7 +158,7 @@ END
 // Menu
 //
 
-IDR_MENU_MAIN MENU
+IDR_MENU_MAIN MENU 
 BEGIN
     POPUP "文件(&F)"
     BEGIN
@@ -200,9 +202,9 @@ BEGIN
         MENUITEM "位置标签\tCtrl+L",                ID_VIEW_POSLABEL
         POPUP "横轴刻度"
         BEGIN
-            MENUITEM "中文时间",            ID_VIEW_HAXIS_CHINESETIME
-            MENUITEM "标准时间",            ID_VIEW_HAXIS_STDTIME
-            MENUITEM "数值索引",            ID_VIEW_HAXIS_INDEX
+            MENUITEM "中文时间",                        ID_VIEW_HAXIS_CHINESETIME
+            MENUITEM "标准时间",                        ID_VIEW_HAXIS_STDTIME
+            MENUITEM "数值索引",                        ID_VIEW_HAXIS_INDEX
         END
         MENUITEM SEPARATOR
         MENUITEM "清除比较曲线\tF12",                 ID_VIEW_CLEARCMP
@@ -240,7 +242,7 @@ END
 // String Table
 //
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_ACTION_STOPPED      "操作被阻止"
     IDS_INVALID_ARGS        "无效参数"
@@ -251,7 +253,7 @@ BEGIN
     IDS_TIMESTAMP           "时间戳"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_DATAPTS             "数据点数"
     IDS_SOURCE_PATH         "数据源路径"
@@ -271,7 +273,7 @@ BEGIN
     IDS_IMGFMT_TIFF         "标签图像文件格式(.tiff)"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_SAVE_IMAGE          "保存图像"
     IDS_SAVE_DATA           "保存数据"
@@ -291,23 +293,25 @@ BEGIN
     IDS_ERR_OUT_OF_MEMORY   "系统内存不足"
 END
 
-STRINGTABLE
+STRINGTABLE 
 BEGIN
     IDS_ERR_GMEM_OVER       "系统图形内存耗尽, 请关闭一些不需要使用的窗口后再尝试当前操作"
     IDS_DATETIMEUNIT        "年月日时分秒"
     IDS_POWER_FLOAT_CONFIRM "对浮点数据进行数值平方操作可能导致数值溢出, 是否一定要进行?"
 END
 
-#endif    // Chinese (Simplified, PRC) resources
+#endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
+#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -363,7 +367,7 @@ END
 // Accelerator
 //
 
-IDR_ACCELERATOR ACCELERATORS
+IDR_ACCELERATOR ACCELERATORS 
 BEGIN
     "K",            ID_ANALYZE_COMPARE,     VIRTKEY, CONTROL, NOINVERT
     "J",            ID_ANALYZE_SYNC,        VIRTKEY, CONTROL, NOINVERT
@@ -393,7 +397,7 @@ BEGIN
     VK_OEM_MINUS,   ID_VIEW_ZOOMOUT,        VIRTKEY, CONTROL, NOINVERT
 END
 
-#endif    // English (United States) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

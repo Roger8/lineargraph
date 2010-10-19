@@ -219,11 +219,14 @@ protected:
 class WINGDI_CLASS CFont
 {
 public:
-    explicit CFont(LONG fh = 0);
-    CFont(const LOGFONTW& lf);
+    CFont();
+    explicit CFont(LONG fh);
+    explicit CFont(const LOGFONTW& lf);
     ~CFont();
-    void Delete();
 
+    BOOL Create(const LOGFONTW& lf);
+    void Delete();
+    
     operator HFONT() const
     {
         return m_hFont;

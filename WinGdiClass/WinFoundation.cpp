@@ -629,6 +629,11 @@ void CPen::Destroy()
     m_hPen = 0;
 }
 
+CFont::CFont(): m_hFont(0)
+{
+
+}
+
 CFont::CFont(LONG fh)
 {
     m_hFont = CreateSysFont(fh);
@@ -684,4 +689,14 @@ HFONT CFont::CreateSysFont(LONG fh)
 
     if( fh ){ lf.lfHeight = fh; }
     return ::CreateFontIndirectW(&lf);
+}
+
+BOOL CFont::Create( const LOGFONTW& lf )
+{
+    if( m_hFont )
+    {
+        return FALSE;
+    }
+    m_hFont = ::CreateFontIndirectW(&lf);
+    return m_hFont != 0;
 }

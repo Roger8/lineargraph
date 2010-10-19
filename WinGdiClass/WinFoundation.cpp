@@ -634,6 +634,11 @@ CFont::CFont(LONG fh)
     m_hFont = CreateSysFont(fh);
 }
 
+CFont::CFont( const LOGFONTW& lf )
+{
+    m_hFont = CreateFontIndirectW(&lf);
+}
+
 CFont::~CFont()
 {
     Delete();
@@ -657,7 +662,7 @@ BOOL CFont::GetSysLogFont(LOGFONTW& lf)
         lf.lfCharSet = GB2312_CHARSET;
         lf.lfQuality = CLEARTYPE_QUALITY;
         lf.lfPitchAndFamily = VARIABLE_PITCH | FF_SWISS;
-        wcsncpy(lf.lfFaceName, L"Segoe UI\0", 8);
+        wcscpy(lf.lfFaceName, L"Segoe UI\0");
     }
     else
     {

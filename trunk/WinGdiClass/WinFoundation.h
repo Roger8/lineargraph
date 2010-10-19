@@ -220,6 +220,7 @@ class WINGDI_CLASS CFont
 {
 public:
     explicit CFont(LONG fh = 0);
+    CFont(const LOGFONTW& lf);
     ~CFont();
     void Delete();
 

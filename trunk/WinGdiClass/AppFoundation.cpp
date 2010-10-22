@@ -99,6 +99,8 @@ BOOL CApplication::DoMessageLoop()
             ::DispatchMessage(&msg);
         }
     }
+
+    ::TlsSetValue(m_tlsMsgPtr, 0);
     return TRUE;
 }
 

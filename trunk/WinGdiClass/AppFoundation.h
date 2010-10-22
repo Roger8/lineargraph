@@ -30,6 +30,8 @@ public:
     //
     static CApplication* GetCurrentApp();
 
+    static MSG* GetCurrentMsg();
+
     virtual BOOL OnInitApplication();
     virtual BOOL OnExitApplication();
 
@@ -37,6 +39,7 @@ private:
     friend int WINAPI DllMain(void*, DWORD, void*);
     static PVOID    m_pvBase;
     static DWORD    m_tlsAppPtr;
+    static DWORD    m_tlsMsgPtr;
 
 public:
     CWindow*    m_pMainWnd;

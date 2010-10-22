@@ -7,8 +7,10 @@ BOOL WINAPI DllMain(void* pvBase, DWORD dwReason, void*)
     {
         CApplication::m_pvBase = pvBase;
         CApplication::m_tlsAppPtr = ::TlsAlloc();
+        CApplication::m_tlsMsgPtr = ::TlsAlloc();
 
-        if( CApplication::m_tlsAppPtr == TLS_OUT_OF_INDEXES )
+        if( CApplication::m_tlsAppPtr == TLS_OUT_OF_INDEXES
+            || CApplication::m_tlsMsgPtr == TLS_OUT_OF_INDEXES )
         {
             return FALSE;
         }
@@ -16,12 +18,21 @@ BOOL WINAPI DllMain(void* pvBase, DWORD dwReason, void*)
     return TRUE;
 }
 
-DWORD CApplication::m_tlsAppPtr = TLS_OUT_OF_INDEXES;
+//
+//
+
 PVOID CApplication::m_pvBase = 0;
+DWORD CApplication::m_tlsAppPtr = TLS_OUT_OF_INDEXES;
+DWORD CApplication::m_tlsMsgPtr = TLS_OUT_OF_INDEXES;
 
 CApplication* CApplication::GetCurrentApp()
 {
     return reinterpret_cast<CApplication*>(::TlsGetValue(m_tlsAppPtr));
+}
+
+MSG* CApplication::GetCurrentMsg()
+{
+    return reinterpret_cast<MSG*>(::TlsGetValue(m_tlsMsgPtr));
 }
 
 CString CApplication::GetAppDirectory()
@@ -67,8 +78,6 @@ HINSTANCE CApplication::GetInstance() const
 
 BOOL CApplication::DoMessageLoop()
 {
-    MSG msg;
-    int nRet;
     if( !m_pMainWnd || !m_pMainWnd->m_hWnd )
     {
         return FALSE;
@@ -76,6 +85,10 @@ BOOL CApplication::DoMessageLoop()
     
 	m_pMainWnd->ShowWindow();
 
+    MSG msg = {0};
+    ::TlsSetValue(m_tlsMsgPtr, &msg);   // Save current message
+
+    int nRet;
     while( nRet = ::GetMessage(&msg, 0, 0, 0) )
     {
         if( nRet == -1 ){ break; }

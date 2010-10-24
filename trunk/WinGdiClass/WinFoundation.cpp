@@ -586,6 +586,11 @@ BOOL CBufferedDC::FrameRect(COLORREF clr, RECT* pRect)
     return ::FrameRect(m_hDC, pRect, CSolidBrush(clr));
 }
 
+BOOL CBufferedDC::FrameRegion(COLORREF clr, HRGN rgn, int w, int h)
+{
+    return ::FrameRgn(m_hDC, rgn, CSolidBrush(clr), w, h);
+}
+
 BOOL CBufferedDC::Copy(HDC dcSrc, int x, int y)
 {
     return ::BitBlt(m_hDC, 0, 0, m_cx, m_cy, dcSrc, x, y, SRCCOPY);

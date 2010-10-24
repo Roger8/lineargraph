@@ -189,6 +189,7 @@ public:
     BOOL Bitblt(int xSrc, int ySrc, HDC dcTarget);
     BOOL FillRect(COLORREF clr, RECT* pRect = 0);
     BOOL FrameRect(COLORREF clr, RECT* pRect = 0);
+    BOOL FrameRegion(COLORREF clr, HRGN rgn, int w=1, int h=1);
     BOOL Copy(HDC dcSrc, int x, int y);
     BOOL AlphaCopy(HDC dcSrc, int x, int y, int al);
 

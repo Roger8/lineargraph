@@ -16,7 +16,7 @@ void linear_graph_new_handler()
     }
 }
 
-CFont CLinearGraphApp::m_themeFont;
+CFont CLinearGraphApp::m_themeFont(0);
 
 CSolidBrush CLinearGraphApp::m_themeBrush(RGB(0x29, 0x39, 0x55));
 

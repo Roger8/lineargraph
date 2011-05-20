@@ -34,7 +34,7 @@ HINSTANCE CWindow::GetInstance() const
 
 PCWSTR CWindow::ClassName()
 {
-    static const WCHAR className[] = L"LinearGraph-BaseWindow";
+    static const WCHAR className[] = L"WinGdiClass-BasicWindow";
     return className;
 }
 

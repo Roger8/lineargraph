@@ -65,10 +65,42 @@ BOOL CSourceSelectDlg::OnCommand(UINT uCode, UINT uID, HWND hCtrl)
             OnBnClickedOk();
         }
         break;
+	case IDC_BTN_SelectAll:
+		OnSelectAll();
+		break;
+	case IDC_BTN_AntiSelectAll:
+		OnAntiSelectAll();
+		break;
     default:
         return CDialog::OnCommand(uCode, uID, hCtrl);
     }
     return TRUE;
+}
+
+void CSourceSelectDlg::OnSelectAll()
+{
+	for (size_t i = 0; i < m_vSource.size(); ++i)
+	{
+		if (!m_listView.IsItemChecked((int)i))
+		{
+			m_listView.SetItemChecked((int)i, true);
+		}
+	}
+}
+
+void CSourceSelectDlg::OnAntiSelectAll()
+{
+	for (size_t i = 0; i < m_vSource.size(); ++i)
+	{
+		if (!m_listView.IsItemChecked((int)i))
+		{
+			m_listView.SetItemChecked((int)i, true);
+		}
+		else
+		{
+			m_listView.SetItemChecked((int)i, false);
+		}
+	}
 }
 
 void CSourceSelectDlg::OnBnClickedOk()

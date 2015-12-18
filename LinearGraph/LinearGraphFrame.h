@@ -18,6 +18,8 @@ protected:
     BOOL OnInitDialog();
     BOOL OnCommand(UINT uCode, UINT uID, HWND hCtrl);
     void OnBnClickedOk();
+	void OnSelectAll();//全选
+	void OnAntiSelectAll();//反选
 
 protected:
     CListView       m_listView;

@@ -55,6 +55,8 @@
 #define IDS_ERR_ACTION_ON_FLOAT         162
 #define IDS_POWER_FLOAT_CONFIRM         162
 #define IDC_BTN_OK                      1002
+#define IDC_BTN_SelectAll				1004//selece all
+#define IDC_BTN_AntiSelectAll				1005//selece all
 #define IDC_EDIT_INFO                   1020
 #define IDC_BTN_CANCEL                  1022
 #define IDC_DTPICKER_DATE               1023
